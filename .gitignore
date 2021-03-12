@@ -1,1 +1,7 @@
+.vscode
+
+package-lock.json
+
 bin
+node_modules
+test/src

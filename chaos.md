@@ -1,24 +1,3 @@
-ready to ship
-tasks:
-build & publish to npm with min.js
-build & pr to @types with .d.ts
-open on Github & use github.io to place document
-
-edge中有搁置
-
-before pr
-https://zhuanlan.zhihu.com/p/349816647
-
-learn:
-TypeScript、Rollup 搭建工具库
-http://blog.maihaoche.com/typescript-rollup-da-jian-gong-ju-ku/
-
-API Extractor
-https://api-extractor.com/
-may help:https://www.cnblogs.com/Answer1215/p/14022598.html
-
-https://www.infoq.cn/article/r58umq8iJZGLA1wW3teU
-
 ```javascript
 // index.ts
 import API from 'xxx'

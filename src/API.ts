@@ -1,4 +1,4 @@
-import { APIConfig, BaseConfig, bodyAsParams, iApi, apiF, iPipe, PipeRequest, PipeResponse, URN, URNParser } from "./type&interface";
+import { APIConfig, BaseConfig, bodyAsParams, iApi, iPipe, PipeRequest, PipeResponse, URN, URNParser } from "./type&interface";
 
 // issue: so... why is every method static?
 export default class API {
@@ -54,6 +54,7 @@ class Api implements iApi {
 
                 const urlMerged = mergeURL(urn, configMerged, params)
                 urlMerged.pathname += configMerged?.suffix ?? ''
+                // body=0,'' ? bug
                 const urlFinal = body ? getURL(urlMerged, configMerged, body) : urlMerged
 
                 // pipe request
@@ -127,18 +128,27 @@ function mergeConfig(baseConfig: BaseConfig, newConfig: BaseConfig): BaseConfig 
 }
 
 function mergeURL(urn: URN, config: BaseConfig, params?: Array<any>): URL {
+    // todo: params now is just for urn. if urn isn't function, then auto parse params to string +=url.search
+    // why: body is just for body, if wrong method, then parser. this one is done.
+    // Both all almost the same thing.
+
     // https://developer.mozilla.org/zh-CN/docs/Web/API/URL/URL
     return new URL(typeof urn === 'function' ? urn(params) : urn, config?.baseURL ?? '')
 }
 
 function getURL(url: URL, config: BaseConfig, body: bodyAsParams): URL {
     const bodyType = Object.prototype.toString.call(body)
-    url.search += url.search.includes('?') ? '&' : ''
     if (['GET', 'HEAD'].includes(config.method!.toUpperCase())) {
+        // situation: 'xxx',xxx/','xxx/?','xxx/?a=1','xxx/?a=1&',
+        const search = url.search.includes('?')
+        // this won't be done automatically on Chromium
+        url.search += search && url.search.slice(-1)[0] !== '&' ? '&' : ''
+
         switch (bodyType) {
             case '[object Object]':
+                // issue: bug when strange body comes
                 // @ts-ignore
-                url.serach += new URLSearchParams(body).toString()
+                url.search += new URLSearchParams(body).toString()
                 break;
             case '[object FormData]':
                 // https://developer.mozilla.org/en-US/docs/Web/API/FormData
@@ -153,6 +163,21 @@ function getURL(url: URL, config: BaseConfig, body: bodyAsParams): URL {
                 break;
             case '[object URLSearchParams]':
                 url.search += body.toString()
+                break
+            // this will be done automatically on Chromium
+            // todo: more Test?
+            // if (search) {
+            //     url.search = '?'.concat(url.search)
+            // }
+
+            case '[object Array]':
+                url.pathname += `/${body.toString()}`
+                break;
+            case '[object String]':
+                url.pathname += `/${body.toString()}`
+                break;
+            case '[object Number]':
+                url.pathname += `/${body.toString()}`
                 break;
         }
     } else {
@@ -167,6 +192,24 @@ function getURL(url: URL, config: BaseConfig, body: bodyAsParams): URL {
     return url
 }
 
+/**
+ * parse the template strings with params
+ * 
+ * @example
+ * ```
+ * // init
+ * name:{
+ *   urn: urnParser(`/xxx/${0}/${1}`)
+ * }
+ * // somewhere
+ * Api.name(body,['user', [1,2,3])
+ * // getUrl: /xxx/user/1,2,3
+ * ```
+ * @param template - template strings
+ * @param placeholder - indexes of params, like $\{0\}
+ * @returns URNParser
+ * @beta
+ */
 export const urnParser = (template: Array<string>, ...placeholder: Array<number>): URNParser => {
     return (params?: Array<any>): string => {
         return template.reduce((previousValue, currentValue, index) => {
