@@ -14,7 +14,9 @@ urnParser: (template: Array<string>, ...placeholder: Array<number>) => URNParser
 
 ## Remarks
 
-function base on Template literals (Template strings) [https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template\_literals](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals) you do can use the string type as placehloder, and give an Object as params, match them with key string. But the way it used would look like: urnParser`/${'key1'}/${'key2'}`<!-- -->, Api.someApi(body, {<!-- -->key1:'',key2:''<!-- -->}<!-- -->) Anyway, need better idea.
+function base on Template literals (Template strings) [ES6 Template literals](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals)
+
+you do can use the string type as placehloder, and give an Object as params, match them with key string. But the way it used would look like: urnParser`/${'key1'}/${'key2'}`<!-- -->, Api.someApi(body, {<!-- -->key1:'',key2:''<!-- -->}<!-- -->) Anyway, need better idea.
 
 ## Example
 

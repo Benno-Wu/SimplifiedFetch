@@ -290,7 +290,8 @@ function getURL(url: URL, config: BaseConfig, body: bodyAsParams): URL {
  * 
  * @remarks
  * function base on Template literals (Template strings)
- * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals}
+ * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals | ES6 Template literals}
+ * 
  * you do can use the string type as placehloder, and give an Object as params, match them with key string.
  * But the way it used would look like: urnParser`/${'key1'}/${'key2'}`, Api.someApi(body, \{key1:'',key2:''\})
  * Anyway, need better idea.

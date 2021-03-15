@@ -17,5 +17,5 @@ enableAbort?: boolean | number;
 
 ## Remarks
 
-[https://developer.mozilla.org/en-US/docs/Web/API/AbortController](https://developer.mozilla.org/en-US/docs/Web/API/AbortController)
+[MDN](https://developer.mozilla.org/en-US/docs/Web/API/AbortController)
 

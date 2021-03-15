@@ -14,7 +14,7 @@ baseURL?: string | URL;
 
 ## Remarks
 
-if it isn't an absolute URL, it will be ignored. [https://developer.mozilla.org/en-US/docs/Web/API/URL/URL](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL)
+if it isn't an absolute URL, it will be ignored. [MDN](https://developer.mozilla.org/en-US/docs/Web/API/URL/URL)
 
 ## Example
 

@@ -19,6 +19,6 @@ export interface iApi
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [request](./simplified-fetch.iapi.request.md) | [iPipe](./simplified-fetch.ipipe.md)<!-- -->&lt;[PipeRequest](./simplified-fetch.piperequest.md)<!-- -->&gt; | <b><i>(BETA)</i></b> |
-|  [response](./simplified-fetch.iapi.response.md) | [iPipe](./simplified-fetch.ipipe.md)<!-- -->&lt;[PipeResponse](./simplified-fetch.piperesponse.md)<!-- -->&gt; | <b><i>(BETA)</i></b> |
+|  [request](./simplified-fetch.iapi.request.md) | [iPipe](./simplified-fetch.ipipe.md)<!-- -->&lt;[PipeRequest](./simplified-fetch.piperequest.md)<!-- -->&gt; | <b><i>(BETA)</i></b> Synchronous executed after internal core operation with url &amp; config, just before fetch [PipeRequest](./simplified-fetch.piperequest.md) |
+|  [response](./simplified-fetch.iapi.response.md) | [iPipe](./simplified-fetch.ipipe.md)<!-- -->&lt;[PipeResponse](./simplified-fetch.piperesponse.md)<!-- -->&gt; | <b><i>(BETA)</i></b> Asynchronous executed just after getting the response [PipeResponse](./simplified-fetch.piperesponse.md) |
 

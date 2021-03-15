@@ -6,6 +6,9 @@
  * @beta
  */
 // @ts-nocheck
+var _: any;
+
+// @ts-nocheck
 (function () {
     try {
         // Object.prototype.__defineGetter__('SimplifiedFetch', function () { return this })
@@ -21,4 +24,4 @@
     } catch (e) { window.globalThis = window }
 })()
 
-export default globalThis
+export default _

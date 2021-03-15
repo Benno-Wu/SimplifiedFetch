@@ -8,5 +8,5 @@
  */
 
 export { default as API, urnParser } from './API'
-export { default as globalThis } from './polyfill/globalThis'
+export { default as global_this } from './polyfill/globalThis'
 export * from './type&interface'

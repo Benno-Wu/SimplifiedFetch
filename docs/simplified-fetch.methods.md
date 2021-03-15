@@ -14,5 +14,5 @@ export declare type Methods = `DELETE` | `GET` | `HEAD` | `OPTIONS` | `POST` | `
 
 ## Remarks
 
-https://fetch.spec.whatwg.org/\#concept-method
+[spec](https://fetch.spec.whatwg.org/#concept-method)
 

@@ -11,8 +11,3 @@ how the response will be transformed
 ```typescript
 bodyMixin?: BodyMixin;
 ```
-
-## Remarks
-
-test
-

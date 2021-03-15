@@ -14,5 +14,5 @@ export declare type bodyAsParams = string | Object | Array<any>;
 
 ## Remarks
 
-when method is 'GET'\|'HEAD', try parse to string mainly by URLSearchParam [https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams](https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams)
+when method is 'GET'\|'HEAD', try parse to string mainly by URLSearchParam [MDN](https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams)
 

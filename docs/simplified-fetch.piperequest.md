@@ -13,6 +13,3 @@ export declare type PipeRequest = (url: URL, config: BaseConfig, param: [string 
 ```
 <b>References:</b> [BaseConfig](./simplified-fetch.baseconfig.md)<!-- -->, [URN](./simplified-fetch.urn.md)
 
-## Remarks
-
-

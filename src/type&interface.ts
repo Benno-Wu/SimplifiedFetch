@@ -1,6 +1,6 @@
 /**
  * basic config
- * @remarks RequestInit {@link https://developer.mozilla.org/en-US/docs/Web/API/Request/Request}
+ * @remarks RequestInit {@link https://developer.mozilla.org/en-US/docs/Web/API/Request/Request | MDN}
  */
 export interface BaseConfig extends RequestInit {
     /**
@@ -15,7 +15,7 @@ export interface BaseConfig extends RequestInit {
      * 
      * @remarks
      * if it isn't an absolute URL, it will be ignored.
-     * {@link https://developer.mozilla.org/en-US/docs/Web/API/URL/URL}
+     * {@link https://developer.mozilla.org/en-US/docs/Web/API/URL/URL | MDN}
     */
     baseURL?: string | URL
     /**
@@ -25,14 +25,13 @@ export interface BaseConfig extends RequestInit {
     method?: Methods
     /**
      * how the response will be transformed
-     * @remarks test
      * @defaultValue `json`
      */
     bodyMixin?: BodyMixin
     /**
      * abort fetch, enable by given true or number(means timeout)
      * @remarks
-     * {@link https://developer.mozilla.org/en-US/docs/Web/API/AbortController}
+     * {@link https://developer.mozilla.org/en-US/docs/Web/API/AbortController | MDN}
      * 
      * @defaultValue `false`
      * @beta
@@ -58,14 +57,14 @@ export interface BaseConfig extends RequestInit {
 /**
  * Http request methods
  * @remarks
- * https://fetch.spec.whatwg.org/#concept-method
+ * {@link https://fetch.spec.whatwg.org/#concept-method | spec}
  */
 export type Methods = `DELETE` | `GET` | `HEAD` | `OPTIONS` | `POST` | `PUT` | `PATCH`
 
 /**
  * transform the response body
  * @remarks
- * https://fetch.spec.whatwg.org/#body-mixin
+ * {@link https://fetch.spec.whatwg.org/#body-mixin | spec}
  */
 export type BodyMixin = 'arrayBuffer' | 'blob' | 'formData' | 'json' | 'text'
 
@@ -101,7 +100,15 @@ export type URNParser = (params?: Array<any>) => string
  * @beta
  */
 export interface iApi {
+    /**
+     * Synchronous executed after internal core operation with url & config, just before fetch
+     * {@link PipeRequest}
+     */
     request: iPipe<PipeRequest>
+    /**
+     * Asynchronous executed just after getting the response
+     * {@link PipeResponse}
+     */
     response: iPipe<PipeResponse>
 }
 
@@ -131,9 +138,8 @@ export type PipeUnion = PipeRequest | PipeResponse
 
 /**
  * Synchronous executed after internal core operation with url & config, just before fetch
- * @remarks
- * @param url - {@link https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch}
- * @param config - {@link https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch}
+ * @param url - {@link https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch | MDN}
+ * @param config - {@link https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch | MDN}
  * @param param - [body, params], Api.someApi(body, params) {@link apiF}
  * @param configs -[api, urn, config, baseConfig] {@link BaseConfig} {@link APIConfig}
  */
@@ -143,8 +149,8 @@ export type PipeRequest = (url: URL, config: BaseConfig
 
 /**
  * Asynchronous executed just after getting the response
- * @param response - {@link https://developer.mozilla.org/en-US/docs/Web/API/Response}
- * @param request - {@link https://developer.mozilla.org/en-US/docs/Web/API/Request}
+ * @param response - {@link https://developer.mozilla.org/en-US/docs/Web/API/Response | MDN}
+ * @param request - {@link https://developer.mozilla.org/en-US/docs/Web/API/Request | MDN}
  * @param funcs - [resolve, reject] end the pipeline when needed
  */
 export type PipeResponse = (response: Response, request: Request,
@@ -154,7 +160,7 @@ export type PipeResponse = (response: Response, request: Request,
  * body of fetch
  * @remarks
  * when method is 'GET'|'HEAD', try parse to string mainly by URLSearchParam
- * {@link https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams}
+ * {@link https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams | MDN}
  */
 export type bodyAsParams = string | Object | Array<any>
 

@@ -15,7 +15,7 @@ export interface BaseConfig extends RequestInit
 
 ## Remarks
 
-RequestInit [https://developer.mozilla.org/en-US/docs/Web/API/Request/Request](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request)
+RequestInit [MDN](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request)
 
 ## Properties
 

@@ -14,5 +14,5 @@ export declare type BodyMixin = 'arrayBuffer' | 'blob' | 'formData' | 'json' | '
 
 ## Remarks
 
-https://fetch.spec.whatwg.org/\#body-mixin
+[spec](https://fetch.spec.whatwg.org/#body-mixin)
 
