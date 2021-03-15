@@ -1,11 +1,27 @@
 import { APIConfig, BaseConfig, bodyAsParams, iApi, iPipe, PipeRequest, PipeResponse, URN, URNParser } from "./type&interface";
 
-// issue: so... why is every method static?
+/**
+ * main entry to generate the SimplifiedFetch
+ * @public
+ */
 export default class API {
     // baseConfig = {}
     // constructor() {
     //     Object.freeze(API.baseConfig)
     // }
+    /**
+     * global basic config
+     * @defaultValue
+     * ```json
+     * method: 'GET',
+     * bodyMixin: 'json',
+     * headers: {
+     *    "Content-Type": "application/json",
+     * },
+     * enableAbort: false,
+     * pureResponse: false,
+     * ```
+     */
     static readonly baseConfig: BaseConfig = {
         method: 'GET',
         bodyMixin: 'json',
@@ -15,19 +31,44 @@ export default class API {
         enableAbort: false,
         pureResponse: false,
     }
+
+    /**
+     * init Api or [newName] on globalThis
+     * @param baseConfig - {@link BaseConfig}
+     * @param apis - {@link APIConfig}
+     */
     static init(baseConfig: BaseConfig, apis: APIConfig) {
         (<any>globalThis)[baseConfig?.newName || 'Api']
             = new Api(apis, mergeConfig(API.baseConfig, baseConfig))
     }
+    /**
+     * create and return the new Api
+     * @param baseConfig - {@link BaseConfig}
+     * @param apis - {@link APIConfig}
+     * @returns SimplifiedFetch
+     */
     static create(baseConfig: BaseConfig, apis: APIConfig) {
         return new Api(apis, mergeConfig(API.baseConfig, baseConfig))
     }
 }
 
-// todo: refactor?
+/**
+ * The unified API request object, also 'SimplifiedFetch'
+ */
 class Api implements iApi {
+    /**
+     * {@link PipeRequest}
+     */
     request = new Pipe<PipeRequest>()
+    /**
+     * {@link PipeResponse}
+     */
     response = new Pipe<PipeResponse>()
+    /**
+     * constructor of Api, return SimplifiedFetch
+     * @param apis - {@link APIConfig}
+     * @param baseConfig - {@link BaseConfig}
+     */
     constructor(apis: APIConfig, baseConfig: BaseConfig = API.baseConfig) {
         for (const [api, { urn, config = {} }] of Object.entries(apis)) {
 
@@ -41,7 +82,6 @@ class Api implements iApi {
 
             const configMerged: BaseConfig = mergeConfig(baseConfig, config)
 
-            // https://developer.mozilla.org/en-US/docs/Web/API/AbortController
             let controller: AbortController, signal: AbortSignal, abort = configMerged?.enableAbort
             if (abort) {
                 controller = new AbortController()
@@ -54,7 +94,6 @@ class Api implements iApi {
 
                 const urlMerged = mergeURL(urn, configMerged, params)
                 urlMerged.pathname += configMerged?.suffix ?? ''
-                // body=0,'' ? bug
                 const urlFinal = body ? getURL(urlMerged, configMerged, body) : urlMerged
 
                 // pipe request
@@ -98,6 +137,10 @@ class Api implements iApi {
     }
 }
 
+/**
+ * use ordered Map to manage the pipe<function>
+ * {@link iPipe}
+ */
 class Pipe<T> implements iPipe<T> {
     pipeMap = new Map<string, T>()
     use = (pipe: T): string => {
@@ -110,7 +153,13 @@ class Pipe<T> implements iPipe<T> {
     }
 }
 
-
+/**
+ * transform the response and resolve([pure response, res] or res)
+ * @param param0 - [resolve, reject] end the pipeline
+ * @param response - origin pure response, {@link https://developer.mozilla.org/en-US/docs/Web/API/Response}
+ * @param bodyMixin - {@link BodyMixin}
+ * @param pure - get from config, whether resolve with Response.clone()
+ */
 function processResponse([resolve, reject]: Array<Function>, response: Response, bodyMixin: string = 'json', pure: boolean = false) {
     const pureResponse: Response | undefined = pure ? response.clone() : undefined;
     (<any>response)[bodyMixin]()
@@ -118,6 +167,12 @@ function processResponse([resolve, reject]: Array<Function>, response: Response,
     // .catch(reject)
 }
 
+/**
+ * merge globalConfig with localConfig
+ * @param baseConfig - {@link BaseConfig}
+ * @param newConfig - {@link BaseConfig}
+ * @returns new object with final config
+ */
 function mergeConfig(baseConfig: BaseConfig, newConfig: BaseConfig): BaseConfig {
     const headers = Object.assign({}, baseConfig?.headers, newConfig?.headers)
     return {
@@ -127,17 +182,32 @@ function mergeConfig(baseConfig: BaseConfig, newConfig: BaseConfig): BaseConfig 
     }
 }
 
+/**
+ * generate fetch url
+ * @param urn - {@link URN}
+ * @param config - {@link BaseConfig}
+ * @param params - Api.someApi(body, params), use for step: urnParser
+ * @returns url wait to fetch
+ */
 function mergeURL(urn: URN, config: BaseConfig, params?: Array<any>): URL {
     // todo: params now is just for urn. if urn isn't function, then auto parse params to string +=url.search
     // why: body is just for body, if wrong method, then parser. this one is done.
-    // Both all almost the same thing.
+    // Both are almost the same thing.
 
-    // https://developer.mozilla.org/zh-CN/docs/Web/API/URL/URL
+    // https://developer.mozilla.org/en-US/docs/Web/API/URL/URL
     return new URL(typeof urn === 'function' ? urn(params) : urn, config?.baseURL ?? '')
 }
 
+/**
+ * transform user's body properly tn fetch's body
+ * @param url - {@link https://developer.mozilla.org/en-US/docs/Web/API/URL}
+ * @param config - {@link BaseConfig}
+ * @param body - {@link bodyAsParams}
+ * @returns final url and config for fetch
+ */
 function getURL(url: URL, config: BaseConfig, body: bodyAsParams): URL {
     const bodyType = Object.prototype.toString.call(body)
+    // reasons: Failed to execute 'fetch' on 'Window': Request with ！GET/HEAD！ method cannot have body.
     if (['GET', 'HEAD'].includes(config.method!.toUpperCase())) {
         // situation: 'xxx',xxx/','xxx/?','xxx/?a=1','xxx/?a=1&',
         const search = url.search.includes('?')
@@ -165,7 +235,7 @@ function getURL(url: URL, config: BaseConfig, body: bodyAsParams): URL {
                 url.search += body.toString()
                 break
             // this will be done automatically on Chromium
-            // todo: more Test?
+            // todo: more compatibility Test?
             // if (search) {
             //     url.search = '?'.concat(url.search)
             // }
@@ -196,19 +266,27 @@ function getURL(url: URL, config: BaseConfig, body: bodyAsParams): URL {
  * parse the template strings with params
  * 
  * @example
- * ```
+ * ```ts
  * // init
- * name:{
+ * someApi:{
  *   urn: urnParser(`/xxx/${0}/${1}`)
  * }
  * // somewhere
- * Api.name(body,['user', [1,2,3])
+ * Api.someApi(body,['user', [1,2,3]])
  * // getUrl: /xxx/user/1,2,3
  * ```
  * @param template - template strings
  * @param placeholder - indexes of params, like $\{0\}
- * @returns URNParser
- * @beta
+ * @returns {@link URNParser}
+ * 
+ * @remarks
+ * function base on Template literals (Template strings)
+ * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals}
+ * you do can use the string type as placehloder, and give an Object as params, match them with key string.
+ * But the way it used would look like: urnParser`/${'key1'}/${'key2'}`, Api.someApi(body, \{key1:'',key2:''\})
+ * Anyway, need better idea.
+ * 
+ * @public
  */
 export const urnParser = (template: Array<string>, ...placeholder: Array<number>): URNParser => {
     return (params?: Array<any>): string => {

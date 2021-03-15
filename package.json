@@ -1,14 +1,13 @@
 {
   "name": "simplified-fetch",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Encapsulate a unified API request object to simplify the use of fetch",
   "main": "bin/index.min.js",
-  "typings": "bin/types/index.d.ts",
+  "typings": "bin/simplified-fetch.d.ts",
   "scripts": {
     "build": "rollup -c rollup.prod.ts --watch",
-    "doc": "api-extractor run --local --verbose --watch",
-    "test:pre": "tsc -p tsconfigTest.json",
-    "test": "jest --cache=false --watch"
+    "doc": "api-extractor run --local --verbose & api-documenter markdown -i temp -o docs",
+    "test": "jest --cache=false --watchAll"
   },
   "homepage": "https://github.com/Benno-Wu/SimplifiedFetch#readme",
   "repository": {
