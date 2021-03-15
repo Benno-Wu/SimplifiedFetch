@@ -38,7 +38,16 @@ export default class API {
      * @param apis - {@link APIConfig}
      */
     static init(baseConfig: BaseConfig, apis: APIConfig) {
-        (<any>globalThis)[baseConfig?.newName || 'Api']
+        let _: any = (function () {
+            if (typeof globalThis === 'object' && globalThis) return globalThis
+            if (typeof window === 'object' && window) return window
+            if (typeof self === 'object' && self) return self
+            // for node
+            if (typeof global === 'object' && global) return global
+            throw new Error(`unable to get globalThis, try 'import 'simplified-fetch/polyfill/globalThis'' before init`)
+        })()
+
+        _[baseConfig?.newName || 'Api']
             = new Api(apis, mergeConfig(API.baseConfig, baseConfig))
     }
     /**

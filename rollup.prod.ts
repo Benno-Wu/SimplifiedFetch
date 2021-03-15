@@ -13,6 +13,7 @@ export default {
     }, {//for test
         file: pkg.main.replace('bin', 'test/src'),
         format: 'iife',
+        // name for testEnv puppeteer
         name: 'test',
         plugins: [
             del({ targets: ['./test/src/types'], hook: 'writeBundle' })
