@@ -26,6 +26,7 @@ export interface BaseConfig extends RequestInit {
     /**
      * how the response will be transformed
      * @defaultValue `json`
+     * {@link BodyMixin}
      */
     bodyMixin?: BodyMixin
     /**

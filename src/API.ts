@@ -56,7 +56,7 @@ export default class API {
      * @param apis - {@link APIConfig}
      * @returns SimplifiedFetch
      */
-    static create(baseConfig: BaseConfig, apis: APIConfig) {
+    static create(baseConfig: BaseConfig, apis: APIConfig): iApi {
         return new Api(apis, mergeConfig(API.baseConfig, baseConfig))
     }
 }
@@ -199,9 +199,9 @@ function mergeConfig(baseConfig: BaseConfig, newConfig: BaseConfig): BaseConfig 
  * @returns url wait to fetch
  */
 function mergeURL(urn: URN, config: BaseConfig, params?: Array<any>): URL {
-    // todo: params now is just for urn. if urn isn't function, then auto parse params to string +=url.search
-    // why: body is just for body, if wrong method, then parser. this one is done.
-    // Both are almost the same thing.
+    // todo: params now is just for urn when it's function. if urn isn't function, then auto parse params to string +=url.search
+    // reason: body is just for body, if get wrong method, then parse. it is already done.
+    // Both do the same thing, so which one first?
 
     // https://developer.mozilla.org/en-US/docs/Web/API/URL/URL
     return new URL(typeof urn === 'function' ? urn(params) : urn, config?.baseURL ?? '')
@@ -260,7 +260,7 @@ function getURL(url: URL, config: BaseConfig, body: bodyAsParams): URL {
                 break;
         }
     } else {
-        //  obj2json,exclude
+        //  obj2string,exclude
         //  ['[object Blob]','[object ArrayBuffer]','[object FormData]',
         //  '[object URLSearchParams]','[object ReadableStream]','[object String]']
         if (bodyType === '[object Object]' || Array.isArray(body)) {
@@ -278,7 +278,7 @@ function getURL(url: URL, config: BaseConfig, body: bodyAsParams): URL {
  * ```ts
  * // init
  * someApi:{
- *   urn: urnParser(`/xxx/${0}/${1}`)
+ *   urn: urnParser`/xxx/${0}/${1}`
  * }
  * // somewhere
  * Api.someApi(body,['user', [1,2,3]])

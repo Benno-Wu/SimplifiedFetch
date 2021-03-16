@@ -24,7 +24,7 @@ you do can use the string type as placehloder, and give an Object as params, mat
 ```ts
 // init
 someApi:{
-  urn: urnParser(`/xxx/${0}/${1}`)
+  urn: urnParser`/xxx/${0}/${1}`
 }
 // somewhere
 Api.someApi(body,['user', [1,2,3]])
