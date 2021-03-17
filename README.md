@@ -36,9 +36,10 @@ await Api.someApi(body, params)
 // support multi instances by create
 const api = API.create({...},{...})
 ```
-ps: what is BodyMixin? [body-mixin | whatwg](https://fetch.spec.whatwg.org/#body-mixin)
 
-if you are familiar with fetch, it's just used for normal step response.json() or some else.
+>### what is BodyMixin? [body-mixin | whatwg](https://fetch.spec.whatwg.org/#body-mixin)
+
+if you are familiar with fetch, it's just used for normal step response.json() or others.
 
 ### Examples
 
@@ -90,7 +91,7 @@ const [constroller, signal] = Api.aborts.someApi
 
 - ### pipeline
 const key = Api.request.use(function)
-__Synchronous executed just before fetch__
+__Synchronous executed just before fetch and after internal core operation with url & config__
 >function: (url: URL, config: BaseConfig, [body, params], [someApi, urn, config, baseConfig])=>any
 >>__only the change to url & config will effect,__ others are just copy from your init/create config & call params
 
@@ -139,14 +140,12 @@ Api.post(body, url)
 # Idea & Beta
 
 - dynamic config when invoke Api.someApi(body, param, config)
-- pipe
-- abort
-- get/post... shorthand
-- pureResponse
 - globalThis
 - suffix
 - runtime nodejs
 - params one more usage
+- how to control the end of pipe?
+return message|boolean? resolve|reject?
 
 ---
 Thanks to MDN, whatwg and Many blogers.

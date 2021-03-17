@@ -1,43 +1,5 @@
-const puppeteer = require("puppeteer-core")
-const fs = require('fs')
-
-const script = fs.readFileSync('.\\test\\src\\index.min.js').toString()
-
-let browser, page
-
-beforeAll(async () => {
-    browser = await puppeteer.launch({
-        headless: true,
-        // headless: false,
-        devtools: true,
-        // https://docs.microsoft.com/en-us/microsoft-edge/puppeteer/
-        executablePath: `C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe`,
-    })
-    page = await browser.newPage()
-    // await page.goto('https://example.com')
-    page.on('console', async _ => {
-        for (let i = 0; i < _.args().length; ++i) {
-            // let __ = await _.args()[i].jsonValue()
-            // console.log(`log: ${_.args()[i]},${_}`)
-            console.log(`log: ${_.args()[i]}`)
-        }
-    })
-    page.on('pageerror', _ => { console.log('error: ', _); })
-    page.on('request', _ => console.log('req: ', [_.headers(), _.postData(), _.url()]))
-    page.on('requestfailed', _ => console.log('reqF: ', [_.headers(), _.postData(), _.url()]))
-    // page.on('response', _ => console.log('res: ', [_.headers(), _.json(), _.url()]))
-    // page.on('requestfinished', async _ => { _ = _.response(); console.log('res: ', [_.headers(), await _.json(), _.url()]) })
-
-    await page.addScriptTag({ content: script })
-})
-
-afterAll(async () => {
-    await browser.close()
-})
-
-describe('Simplified Fetch Test', () => {
-
-    test('API create', async () => {
+describe('Simplified Fetch Base Test', () => {
+    beforeAll(async () => {
         const _ = await page.evaluate(async () => {
             return globalThis.api = test.API.create({
                 method: 'POST',
@@ -159,7 +121,6 @@ describe('Simplified Fetch Test', () => {
         const _ = await page.evaluate(async (user) => {
             return await Api.postUser(user)
         }, user)
-        console.log(_);
         expect(_).toEqual({ ...user, id: 11 })
     })
 })

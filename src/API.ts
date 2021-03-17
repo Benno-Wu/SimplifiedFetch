@@ -63,8 +63,14 @@ export default class API {
 
 /**
  * The unified API request object, also 'SimplifiedFetch'
+ * @remarks
+ * refactor maybe
  */
 class Api implements iApi {
+    /**
+     * for AbortController & Signal
+     */
+    aborts: any = {};
     /**
      * {@link PipeRequest}
      */
@@ -96,7 +102,7 @@ class Api implements iApi {
                 controller = new AbortController()
                 signal = controller.signal
                 configMerged.signal = signal;
-                (<any>this).aborts[api] = [controller, signal]
+                this.aborts[api] = [controller, signal]
             }
 
             (<any>this)[api] = (body?: bodyAsParams, params?: Array<any>): Promise<any> => {
@@ -114,7 +120,10 @@ class Api implements iApi {
                 return new Promise((resolve, reject) => {
                     if (typeof abort === 'number') {
                         (<any>signal)['timeout'] = abort
-                        setTimeout(controller.abort, abort)
+                        // setTimeout(controller.abort, abort)
+                        // http://cncc.bingj.com/cache.aspx?q=abortcontroller+TypeError%3a+Illegal+invocation&d=4529919372958838&mkt=zh-CN&setlang=zh-CN&w=_Kx5vzyg9zAL-DC-uiwBRYUEGu1ci6oI
+                        // abortcontroller TypeError: Illegal invocation
+                        setTimeout(() => controller.abort(), abort)
                     }
 
                     const request = new Request(urlFinal.toString(), configMerged)
@@ -135,10 +144,10 @@ class Api implements iApi {
                         .catch(e => {
                             // https://developer.mozilla.org/en-US/docs/Web/API/DOMException
                             // if (e?.code === 20) {
-                            if (e.name === 'AbortError') {
+                            if (e.name === 'AbortError' && typeof abort === 'number') {
                                 (<any>e)['timeout'] = abort
                             }
-                            throw e
+                            reject(e)
                         })
                 })
             }
