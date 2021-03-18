@@ -1,6 +1,6 @@
 {
   "name": "simplified-fetch",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Encapsulate a unified API request object to simplify the use of fetch",
   "main": "bin/index.min.js",
   "typings": "bin/simplified-fetch.d.ts",

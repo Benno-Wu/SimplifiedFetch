@@ -106,6 +106,8 @@ class Api implements iApi {
             }
 
             (<any>this)[api] = (body?: bodyAsParams, params?: Array<any>): Promise<any> => {
+                // controller of both pipelines
+                let isEnd = false
 
                 const urlMerged = mergeURL(urn, configMerged, params)
                 urlMerged.pathname += configMerged?.suffix ?? ''
@@ -114,10 +116,17 @@ class Api implements iApi {
                 // pipe request
                 // too many parameters, but good for bug fix when people use this
                 for (const [key, func] of this.request.pipeMap) {
-                    func(urlFinal, configMerged, [body, params], [api, urn, config, baseConfig])
+                    if (!isEnd) {
+                        isEnd = func(urlFinal, configMerged, [body, params], [api, urn, config, baseConfig])
+                    }
                 }
 
                 return new Promise((resolve, reject) => {
+
+                    if (!!isEnd) reject(isEnd)
+                    const res = (_: any) => { isEnd = true; resolve(_) }
+                    const rej = (_: any) => { isEnd = true; reject(_) }
+
                     if (typeof abort === 'number') {
                         (<any>signal)['timeout'] = abort
                         // setTimeout(controller.abort, abort)
@@ -132,7 +141,8 @@ class Api implements iApi {
 
                             // pipe response
                             for (const [key, func] of this.response.pipeMap) {
-                                await func(response, request, [resolve, reject])
+                                await func(response.clone(), request, [res, rej])
+                                if (!!isEnd) return
                             }
                             // too many parameters
                             // await [...this.response.pipeMap.values()].reduce(

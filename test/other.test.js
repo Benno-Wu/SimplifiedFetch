@@ -152,7 +152,33 @@ describe('Simplified Fetch Other Test', () => {
                 resultLen: 10,
             })
         })
-        test.only('response pipe', async () => {
+        test('request pipe reject', async () => {
+            const _ = await page.evaluate(async () => {
+                const final = {}
+                const key = Api.request.use((url, config, [body, params], [someApi, urn, configF, configB]) => {
+                    return 'stop before fetch'
+                })
+                const key2 = Api.request.use(() => {
+                    console.log('Gotcha')
+                    final.gotcha = true
+                })
+                try {
+                    const result = await Api.get(1, '/users')
+                    final.result = result
+                } catch (error) {
+                    final.error = error
+                }
+                Api.request.eject(key)
+                Api.request.eject(key2)
+                return final
+            })
+            expect(_).toEqual({
+                error: 'stop before fetch',
+                gotcha: undefined,
+                result: undefined,
+            })
+        })
+        test('response pipe resolve', async () => {
             const _ = await page.evaluate(async () => {
                 const final = {}
                 const key = Api.request.use((url, config) => {
@@ -164,33 +190,61 @@ describe('Simplified Fetch Other Test', () => {
                 final.reqL = Api.request.pipeMap.size
                 const key2 = Api.response.use(async (response, request, [resolve, reject]) => {
                     final.bodyUsed = response.bodyUsed
-                    console.log(response.bodyUsed)
                     const res = await response.json()
-                    console.log(res);
                     final.bodyUndefined = request.body === undefined
                     final.ok = response.ok
                     final.used = response.bodyUsed
                     resolve(res.map(obj => ({ test: 'test' })))
-                    return true
                 })
-                Api.response.use(() => console.log('Gotcha BUG!'))
+                const key3 = Api.response.use(() => {
+                    console.log('Gotcha!')
+                    final.gotcha = true
+                })
                 final.resL = Api.response.pipeMap.size
                 const result = await Api.pipeUser({ whatever: 'whatever' })
-                console.log('???');
                 final.result = result
+                Api.request.eject(key)
+                Api.response.eject(key2)
+                Api.response.eject(key3)
                 return final
             })
-            console.log(_)
             expect(_).toEqual({
                 reqL: 1, resL: 2,
                 bodyUndefined: true,
                 bodyUsed: false,
                 ok: true,
                 used: true,
-                result: new Array(10).fill({ test: 'test' })
+                result: new Array(10).fill({ test: 'test' }),
+                gotcha: undefined,
             })
         })
-        test.todo('response pipe reject')
+        test('response pipe reject', async () => {
+            const _ = await page.evaluate(async () => {
+                const final = {}
+                const key = Api.response.use(async (response, request, [resolve, reject]) => {
+                    const res = await response.json()
+                    reject(res.id)
+                })
+                const key2 = Api.response.use(() => {
+                    console.log('Gotcha!')
+                    final.gotcha = true
+                })
+                try {
+                    const result = await Api.get(1, '/users')
+                    final.result = result
+                } catch (error) {
+                    final.error = error
+                }
+                Api.response.eject(key)
+                Api.response.eject(key2)
+                return final
+            })
+            expect(_).toEqual({
+                error: 1,
+                result: undefined,
+                gotcha: undefined,
+            })
+        })
     })
 
     describe('suffix', () => {

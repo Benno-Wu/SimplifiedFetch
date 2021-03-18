@@ -71,7 +71,7 @@ mainly for transforming of 'urn' in each config
 ```js
 // init
 someApi:{
-    urn: urnParser`/xxx/${0}/${1}`
+  urn: urnParser`/xxx/${0}/${1}`
 }
 // somewhere.js
 Api.someApi(body, ['user',[1,2,3]])
@@ -89,7 +89,7 @@ const [constroller, signal] = Api.aborts.someApi
 ```
 >when you use as timeout, the number is accessible on signal.timeout and (error: AbortError).timeout
 
-- ### pipeline
+- ### pipeline & control
 const key = Api.request.use(function)
 __Synchronous executed just before fetch and after internal core operation with url & config__
 >function: (url: URL, config: BaseConfig, [body, params], [someApi, urn, config, baseConfig])=>any
@@ -105,6 +105,14 @@ __Asynchronous executed just after get Response__
 
 Api.response.eject(key)
 >remove specific function from response pipeline
+
+`control`
+
+___request___
+function return true or any message, someApi will immediate reject with that, don't forget to catch it.
+
+___response___
+invoke resolve | reject to end pipeline
 
 - ### body
 __Failed to execute 'fetch' on 'Window': Request with ！GET/HEAD！ method cannot have body.__
@@ -144,8 +152,7 @@ Api.post(body, url)
 - suffix
 - runtime nodejs
 - params one more usage
-- how to control the end of pipe?
-return message|boolean? resolve|reject?
+- use/eject with array
 
 ---
 Thanks to MDN, whatwg and Many blogers.

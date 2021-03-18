@@ -1,4 +1,11 @@
 
+### 0.0.7
+- new control of pipeline
+- pipeline test passed
+
+new ideas
+- use/eject with array
+
 ### 0.0.6
 _notice:_ pipeline will fixed soon and come with new design of control
 - test passed: abort, pureResponse
