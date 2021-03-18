@@ -1,3 +1,7 @@
+### 0.0.8
+- add output esm.js
+
+now support umd & esm
 
 ### 0.0.7
 - new control of pipeline

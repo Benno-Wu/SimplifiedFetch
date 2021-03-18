@@ -6,9 +6,13 @@ import { uglify } from "rollup-plugin-uglify"
 export default {
     // treeshake: false,
     input: './src/index.ts',
-    output: [{//for publish
+    output: [{//for umd publish
         file: pkg.main,
         format: 'umd',
+        name: pkg.name,
+    }, {//for esm publish
+        file: pkg.module,
+        format: 'esm',
         name: pkg.name,
     }, {//for test
         file: pkg.main.replace('bin', 'test/src'),
