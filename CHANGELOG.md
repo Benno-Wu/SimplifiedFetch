@@ -1,3 +1,9 @@
+### 0.0.9
+- fix export error & forget to generate the type
+
+knowns bugs
+- wrong polyfill export, it always runs even if you don't import it.
+
 ### 0.0.8
 - add output esm.js
 

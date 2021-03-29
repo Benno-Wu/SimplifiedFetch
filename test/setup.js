@@ -1,6 +1,6 @@
 const puppeteer = require("puppeteer-core")
 const fs = require('fs')
-const script = fs.readFileSync('.\\test\\src\\index.min.js').toString()
+const script = fs.readFileSync('.\\test\\src\\index.iife.js').toString()
 
 // let browser, page
 // how this works? unknown, but each jest test has own context, so there will be many browser instances

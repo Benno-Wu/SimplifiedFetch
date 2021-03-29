@@ -1,7 +1,7 @@
 describe('Simplified Fetch Other Test', () => {
     beforeAll(async () => {
         await page.evaluate(async () => {
-            return test.API.init({
+            return test.default.init({
                 method: 'POST',
                 baseURL: 'https://jsonplaceholder.typicode.com',
             }, {

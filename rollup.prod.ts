@@ -15,7 +15,7 @@ export default {
         format: 'esm',
         name: pkg.name,
     }, {//for test
-        file: pkg.main.replace('bin', 'test/src'),
+        file: pkg.main.replace('bin', 'test/src').replace('umd', 'iife'),
         format: 'iife',
         // name for testEnv puppeteer
         name: 'test',

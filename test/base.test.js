@@ -1,7 +1,7 @@
 describe('Simplified Fetch Base Test', () => {
     beforeAll(async () => {
         const _ = await page.evaluate(async () => {
-            return globalThis.api = test.API.create({
+            return globalThis.api = test.default.create({
                 method: 'POST',
                 baseURL: 'https://jsonplaceholder.typicode.com',
             }, {
@@ -18,7 +18,7 @@ describe('Simplified Fetch Base Test', () => {
 
     test('API init', async () => {
         await page.evaluate(async () => {
-            return test.API.init({
+            return test.default.init({
                 method: 'POST',
                 baseURL: 'https://jsonplaceholder.typicode.com',
             }, {
