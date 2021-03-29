@@ -1,3 +1,6 @@
+### 0.0.10
+- fix polyfill export
+
 ### 0.0.9
 - fix export error & forget to generate the type
 

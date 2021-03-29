@@ -3,7 +3,7 @@ import typescript from "@rollup/plugin-typescript"
 import del from "rollup-plugin-delete"
 import { uglify } from "rollup-plugin-uglify"
 
-export default {
+export default [{
     // treeshake: false,
     input: './src/index.ts',
     output: [{//for umd publish
@@ -32,4 +32,21 @@ export default {
         }),
         uglify(),
     ],
-}
+}, {// for polyfill
+    input: {
+        globalThis: './src/polyfill/globalThis.ts',
+    },
+    output: {
+        dir: './polyfill',
+        entryFileNames: '[name]/index.js',
+        format: 'esm',
+    },
+    plugins: [
+        del({ targets: ['./polyfill'] }),
+        typescript({
+            tsconfig: false,
+            include: './src/polyfill/*',
+        }),
+        uglify(),
+    ]
+}]

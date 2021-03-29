@@ -1,13 +1,3 @@
-/**
- * polyfill for globalThis
- * @remarks issue: frames
- * 
- * ref: {@link https://mathiasbynens.be/notes/globalthis}
- * @beta
- */
-// @ts-nocheck
-var _: any;
-
 // @ts-nocheck
 (function () {
     try {
@@ -24,4 +14,11 @@ var _: any;
     } catch (e) { window.globalThis = window }
 })()
 
-export default _
+/**
+ * polyfill for globalThis
+ * @remarks issue: frames
+ *
+ * ref: {@link https://mathiasbynens.be/notes/globalthis}
+ * @beta
+ */
+export const global_this = globalThis
