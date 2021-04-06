@@ -9,7 +9,7 @@ Synchronous executed after internal core operation with url &amp; config, just b
 <b>Signature:</b>
 
 ```typescript
-export declare type PipeRequest = (url: URL, config: BaseConfig, param: [string | Object | Array<any> | undefined, Array<any> | undefined], configs: [string, URN, BaseConfig, BaseConfig]) => any;
+export declare type PipeRequest = (url: URL, config: BaseConfig, param: [bodyAsParams | undefined, Array<unknown> | undefined], configs: [string, URN, BaseConfig, BaseConfig]) => boolean;
 ```
-<b>References:</b> [BaseConfig](./simplified-fetch.baseconfig.md)<!-- -->, [URN](./simplified-fetch.urn.md)
+<b>References:</b> [BaseConfig](./simplified-fetch.baseconfig.md)<!-- -->, [bodyAsParams](./simplified-fetch.bodyasparams.md)<!-- -->, [URN](./simplified-fetch.urn.md)
 

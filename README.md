@@ -19,6 +19,7 @@ API.init({
     bodyMixin?: BodyMixin, // default:'json', 'text', 'blob', 'formData', 'arrayBuffer'
     enableAbort?: boolean | number, // abort & timeout
     pureResponse?: boolean, // default:false, whether resolved with Response.clone()
+    // format: [response, pureResponse] or response
     suffix?: string, // alpha test
 },{
     someApi:{
@@ -44,8 +45,9 @@ if you are familiar with fetch, it's just used for normal step response.json() o
 ### Examples
 
 ```js
-// todo
-// mainly copy from *.test.js
+// have a quick look at *.test.js
+
+// todo ts examples
 ```
 
 ## Config & Ability

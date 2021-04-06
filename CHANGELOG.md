@@ -1,3 +1,6 @@
+### 0.0.11
+- better type support
+
 ### 0.0.10
 - fix polyfill export
 

@@ -9,7 +9,7 @@ body of fetch
 <b>Signature:</b>
 
 ```typescript
-export declare type bodyAsParams = string | Object | Array<any>;
+export declare type bodyAsParams = string | Object | Array<unknown>;
 ```
 
 ## Remarks

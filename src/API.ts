@@ -1,4 +1,4 @@
-import { APIConfig, BaseConfig, bodyAsParams, iApi, iPipe, PipeRequest, PipeResponse, URN, URNParser } from "./type&interface";
+import { APIConfig, BaseConfig, bodyAsParams, iAborts, iApi, iPipe, PipeRequest, PipeResponse, URN, URNParser } from "./type&interface";
 
 /**
  * main entry to generate the SimplifiedFetch
@@ -68,9 +68,9 @@ export default class API {
  */
 class Api implements iApi {
     /**
-     * for AbortController & Signal
+     * for AbortController & AbortSignal
      */
-    aborts: any = {};
+    aborts: iAborts = {}
     /**
      * {@link PipeRequest}
      */
@@ -105,7 +105,7 @@ class Api implements iApi {
                 this.aborts[api] = [controller, signal]
             }
 
-            (<any>this)[api] = (body?: bodyAsParams, params?: Array<any>): Promise<any> => {
+            (<any>this)[api] = (body?: bodyAsParams, params?: Array<unknown>): Promise<unknown> => {
                 // controller of both pipelines
                 let isEnd = false
 
@@ -124,8 +124,8 @@ class Api implements iApi {
                 return new Promise((resolve, reject) => {
 
                     if (!!isEnd) reject(isEnd)
-                    const res = (_: any) => { isEnd = true; resolve(_) }
-                    const rej = (_: any) => { isEnd = true; reject(_) }
+                    const res = (_: unknown) => { isEnd = true; resolve(_) }
+                    const rej = (_: unknown) => { isEnd = true; reject(_) }
 
                     if (typeof abort === 'number') {
                         (<any>signal)['timeout'] = abort
@@ -191,7 +191,7 @@ class Pipe<T> implements iPipe<T> {
 function processResponse([resolve, reject]: Array<Function>, response: Response, bodyMixin: string = 'json', pure: boolean = false) {
     const pureResponse: Response | undefined = pure ? response.clone() : undefined;
     (<any>response)[bodyMixin]()
-        .then((res: any) => resolve(pure ? [res, pureResponse] : res))
+        .then((res: unknown) => resolve(pure ? [res, pureResponse] : res))
     // .catch(reject)
 }
 
@@ -217,7 +217,7 @@ function mergeConfig(baseConfig: BaseConfig, newConfig: BaseConfig): BaseConfig 
  * @param params - Api.someApi(body, params), use for step: urnParser
  * @returns url wait to fetch
  */
-function mergeURL(urn: URN, config: BaseConfig, params?: Array<any>): URL {
+function mergeURL(urn: URN, config: BaseConfig, params?: Array<unknown>): URL {
     // todo: params now is just for urn when it's function. if urn isn't function, then auto parse params to string +=url.search
     // reason: body is just for body, if get wrong method, then parse. it is already done.
     // Both do the same thing, so which one first?
@@ -318,7 +318,7 @@ function getURL(url: URL, config: BaseConfig, body: bodyAsParams): URL {
  * @public
  */
 export const urnParser = (template: Array<string>, ...placeholder: Array<number>): URNParser => {
-    return (params?: Array<any>): string => {
+    return (params?: Array<unknown>): string => {
         return template.reduce((previousValue, currentValue, index) => {
             return previousValue + currentValue + (params?.[placeholder[index]] ?? '')
         }, '')

@@ -72,14 +72,24 @@ export type BodyMixin = 'arrayBuffer' | 'blob' | 'formData' | 'json' | 'text'
 /**
  * config of each api
  * @param key - access on Api to fetch
- * @param urn - {@link URN}
- * @param config - {@link BaseConfig}
+ * @param request - {@link request}
  */
 export interface APIConfig {
-    [propName: string]: {
-        urn: URN
-        config?: BaseConfig
-    }
+    [propName: string]: request
+}
+
+/**
+ * config of fetch
+ */
+export type request = {
+    /**
+     * {@link URN}
+     */
+    urn: URN,
+    /**
+     * {@link BaseConfig}
+     */
+    config?: BaseConfig
 }
 
 /**
@@ -92,7 +102,7 @@ export type URN = string | URNParser
 /**
  * function which parser the urn with prarms
  */
-export type URNParser = (params?: Array<any>) => string
+export type URNParser = (params?: Array<unknown>) => string
 
 /**
  * pipe Map<function> which operate Request & Response
@@ -101,6 +111,10 @@ export type URNParser = (params?: Array<any>) => string
  * @beta
  */
 export interface iApi {
+    /**
+     * get AbortController & AbortSignal via [controller, signal]= Api.aborts.someApi
+     */
+    aborts: iAborts
     /**
      * Synchronous executed after internal core operation with url & config, just before fetch
      * {@link PipeRequest}
@@ -112,6 +126,11 @@ export interface iApi {
      */
     response: iPipe<PipeResponse>
 }
+
+/**
+ * build-in, automatically generated AbortController & AbortSignal
+ */
+export type iAborts = Record<string, [AbortController, AbortSignal]>
 
 /**
  * manage the functions which pipe the request or response
@@ -144,9 +163,9 @@ export type PipeUnion = PipeRequest | PipeResponse
  * @param param - [body, params], Api.someApi(body, params) {@link apiF}
  * @param configs -[api, urn, config, baseConfig] {@link BaseConfig} {@link APIConfig}
  */
-export type PipeRequest = (url: URL, config: BaseConfig
-    , param: [string | Object | Array<any> | undefined, Array<any> | undefined]
-    , configs: [string, URN, BaseConfig, BaseConfig]) => any
+export type PipeRequest = (url: URL, config: BaseConfig,
+    param: [bodyAsParams | undefined, Array<unknown> | undefined],
+    configs: [string, URN, BaseConfig, BaseConfig]) => boolean
 
 /**
  * Asynchronous executed just after getting the response
@@ -155,7 +174,7 @@ export type PipeRequest = (url: URL, config: BaseConfig
  * @param funcs - [resolve, reject] end the pipeline when needed
  */
 export type PipeResponse = (response: Response, request: Request,
-    funcs: [(value: unknown) => void, (reason?: any) => void]) => Promise<any>
+    funcs: [(value: unknown) => void, (reason?: any) => void]) => Promise<unknown>
 
 /**
  * body of fetch
@@ -163,9 +182,9 @@ export type PipeResponse = (response: Response, request: Request,
  * when method is 'GET'|'HEAD', try parse to string mainly by URLSearchParam
  * {@link https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams | MDN}
  */
-export type bodyAsParams = string | Object | Array<any>
+export type bodyAsParams = string | Object | Array<unknown>
 
 /**
  * the access of configed fetch
  */
-export type apiF = (body?: bodyAsParams, params?: Array<any>) => Promise<any>
+export type apiF = (body?: bodyAsParams, params?: Array<unknown>) => Promise<unknown>
