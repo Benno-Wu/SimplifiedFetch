@@ -1,3 +1,6 @@
+### 0.0.12
+- better type support
+
 ### 0.0.11
 - better type support
 

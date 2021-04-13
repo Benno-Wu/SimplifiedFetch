@@ -186,5 +186,9 @@ export type bodyAsParams = string | Object | Array<unknown>
 
 /**
  * the access of configed fetch
+ * @typeParam returns - the type of return
+ * @param body - {@link bodyAsParams}
+ * @param params - use for url building, will extended
+ * @returns Promise\<returns\>
  */
-export type apiF = (body?: bodyAsParams, params?: Array<unknown>) => Promise<unknown>
+export type apiF<returns> = (body?: bodyAsParams, params?: Array<unknown>) => Promise<returns>
