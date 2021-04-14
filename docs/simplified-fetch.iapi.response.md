@@ -4,9 +4,6 @@
 
 ## iApi.response property
 
-> This API is provided as a preview for developers and may change based on feedback that we receive. Do not use this API in a production environment.
-> 
-
 Asynchronous executed just after getting the response [PipeResponse](./simplified-fetch.piperesponse.md)
 
 <b>Signature:</b>

@@ -4,9 +4,6 @@
 
 ## iApi interface
 
-> This API is provided as a preview for developers and may change based on feedback that we receive. Do not use this API in a production environment.
-> 
-
 pipe Map<function> which operate Request &amp; Response [PipeRequest](./simplified-fetch.piperequest.md) [PipeResponse](./simplified-fetch.piperesponse.md)
 
 <b>Signature:</b>
@@ -19,7 +16,7 @@ export interface iApi
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [aborts](./simplified-fetch.iapi.aborts.md) | [iAborts](./simplified-fetch.iaborts.md) | <b><i>(BETA)</i></b> get AbortController &amp; AbortSignal via \[controller, signal\]= Api.aborts.someApi |
-|  [request](./simplified-fetch.iapi.request.md) | [iPipe](./simplified-fetch.ipipe.md)<!-- -->&lt;[PipeRequest](./simplified-fetch.piperequest.md)<!-- -->&gt; | <b><i>(BETA)</i></b> Synchronous executed after internal core operation with url &amp; config, just before fetch [PipeRequest](./simplified-fetch.piperequest.md) |
-|  [response](./simplified-fetch.iapi.response.md) | [iPipe](./simplified-fetch.ipipe.md)<!-- -->&lt;[PipeResponse](./simplified-fetch.piperesponse.md)<!-- -->&gt; | <b><i>(BETA)</i></b> Asynchronous executed just after getting the response [PipeResponse](./simplified-fetch.piperesponse.md) |
+|  [aborts](./simplified-fetch.iapi.aborts.md) | [iAborts](./simplified-fetch.iaborts.md) | get AbortController &amp; AbortSignal via \[controller, signal\]= Api.aborts.someApi |
+|  [request](./simplified-fetch.iapi.request.md) | [iPipe](./simplified-fetch.ipipe.md)<!-- -->&lt;[PipeRequest](./simplified-fetch.piperequest.md)<!-- -->&gt; | Synchronous executed after internal core operation with url &amp; config, just before fetch [PipeRequest](./simplified-fetch.piperequest.md) |
+|  [response](./simplified-fetch.iapi.response.md) | [iPipe](./simplified-fetch.ipipe.md)<!-- -->&lt;[PipeResponse](./simplified-fetch.piperesponse.md)<!-- -->&gt; | Asynchronous executed just after getting the response [PipeResponse](./simplified-fetch.piperesponse.md) |
 

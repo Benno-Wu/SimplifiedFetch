@@ -9,5 +9,5 @@ eject a function
 <b>Signature:</b>
 
 ```typescript
-eject: (key: string) => boolean;
+eject: (key: string | string[]) => boolean | boolean[];
 ```

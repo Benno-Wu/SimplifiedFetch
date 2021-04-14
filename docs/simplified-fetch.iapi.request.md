@@ -4,9 +4,6 @@
 
 ## iApi.request property
 
-> This API is provided as a preview for developers and may change based on feedback that we receive. Do not use this API in a production environment.
-> 
-
 Synchronous executed after internal core operation with url &amp; config, just before fetch [PipeRequest](./simplified-fetch.piperequest.md)
 
 <b>Signature:</b>

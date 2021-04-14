@@ -1,6 +1,7 @@
 /**
  * basic config
  * @remarks RequestInit {@link https://developer.mozilla.org/en-US/docs/Web/API/Request/Request | MDN}
+ * @public
  */
 export interface BaseConfig extends RequestInit {
     /**
@@ -35,22 +36,17 @@ export interface BaseConfig extends RequestInit {
      * {@link https://developer.mozilla.org/en-US/docs/Web/API/AbortController | MDN}
      * 
      * @defaultValue `false`
-     * @beta
      */
     enableAbort?: boolean | number
     /**
      * set ture will get return Response.clone()
      * @defaultValue `false`
-     * @beta
      */
     pureResponse?: boolean
     /**
      * add suffix for url
      * @example
      * .do .json
-     * @remarks
-     * may delete
-     * @alpha
      */
     suffix?: string
 }
@@ -59,6 +55,7 @@ export interface BaseConfig extends RequestInit {
  * Http request methods
  * @remarks
  * {@link https://fetch.spec.whatwg.org/#concept-method | spec}
+ * @public
  */
 export type Methods = `DELETE` | `GET` | `HEAD` | `OPTIONS` | `POST` | `PUT` | `PATCH`
 
@@ -66,6 +63,7 @@ export type Methods = `DELETE` | `GET` | `HEAD` | `OPTIONS` | `POST` | `PUT` | `
  * transform the response body
  * @remarks
  * {@link https://fetch.spec.whatwg.org/#body-mixin | spec}
+ * @public
  */
 export type BodyMixin = 'arrayBuffer' | 'blob' | 'formData' | 'json' | 'text'
 
@@ -73,6 +71,7 @@ export type BodyMixin = 'arrayBuffer' | 'blob' | 'formData' | 'json' | 'text'
  * config of each api
  * @param key - access on Api to fetch
  * @param request - {@link request}
+ * @public
  */
 export interface APIConfig {
     [propName: string]: request
@@ -80,6 +79,7 @@ export interface APIConfig {
 
 /**
  * config of fetch
+ * @public
  */
 export type request = {
     /**
@@ -96,11 +96,13 @@ export type request = {
  * rest part of the fetch url
  * @remarks
  * could be a function like {@link urnParser}
+ * @public
  */
 export type URN = string | URNParser
 
 /**
  * function which parser the urn with prarms
+ * @public
  */
 export type URNParser = (params?: Array<unknown>) => string
 
@@ -108,7 +110,7 @@ export type URNParser = (params?: Array<unknown>) => string
  * pipe Map<function> which operate Request & Response
  * {@link PipeRequest}
  * {@link PipeResponse}
- * @beta
+ * @public
  */
 export interface iApi {
     /**
@@ -129,11 +131,14 @@ export interface iApi {
 
 /**
  * build-in, automatically generated AbortController & AbortSignal
+ * @public
  */
 export type iAborts = Record<string, [AbortController, AbortSignal]>
 
 /**
  * manage the functions which pipe the request or response
+ * @typeParam T- function of {@link PipeRequest}/{@link PipeResponse}
+ * @public
  */
 export interface iPipe<T> {
     /**
@@ -145,13 +150,13 @@ export interface iPipe<T> {
      * @param pipe - function as pipe
      * @returns key for eject
      */
-    use: (pipe: T) => string
+    use: (pipe: T | T[]) => string | string[]
     /**
      * eject a function
      * @param key - unique key for used function
      * @returns has & eject success?
      */
-    eject: (key: string) => boolean
+    eject: (key: string | string[]) => boolean | boolean[]
 }
 
 export type PipeUnion = PipeRequest | PipeResponse
@@ -162,6 +167,7 @@ export type PipeUnion = PipeRequest | PipeResponse
  * @param config - {@link https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch | MDN}
  * @param param - [body, params], Api.someApi(body, params) {@link apiF}
  * @param configs -[api, urn, config, baseConfig] {@link BaseConfig} {@link APIConfig}
+ * @public
  */
 export type PipeRequest = (url: URL, config: BaseConfig,
     param: [bodyAsParams | undefined, Array<unknown> | undefined],
@@ -172,6 +178,7 @@ export type PipeRequest = (url: URL, config: BaseConfig,
  * @param response - {@link https://developer.mozilla.org/en-US/docs/Web/API/Response | MDN}
  * @param request - {@link https://developer.mozilla.org/en-US/docs/Web/API/Request | MDN}
  * @param funcs - [resolve, reject] end the pipeline when needed
+ * @public
  */
 export type PipeResponse = (response: Response, request: Request,
     funcs: [(value: unknown) => void, (reason?: any) => void]) => Promise<unknown>
@@ -181,6 +188,7 @@ export type PipeResponse = (response: Response, request: Request,
  * @remarks
  * when method is 'GET'|'HEAD', try parse to string mainly by URLSearchParam
  * {@link https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams | MDN}
+ * @public
  */
 export type bodyAsParams = string | Object | Array<unknown>
 
@@ -190,5 +198,6 @@ export type bodyAsParams = string | Object | Array<unknown>
  * @param body - {@link bodyAsParams}
  * @param params - use for url building, will extended
  * @returns Promise\<returns\>
+ * @public
  */
 export type apiF<returns> = (body?: bodyAsParams, params?: Array<unknown>) => Promise<returns>

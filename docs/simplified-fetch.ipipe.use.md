@@ -9,5 +9,5 @@ push a function
 <b>Signature:</b>
 
 ```typescript
-use: (pipe: T) => string;
+use: (pipe: T | T[]) => string | string[];
 ```

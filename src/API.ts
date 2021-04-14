@@ -171,13 +171,23 @@ class Api implements iApi {
  */
 class Pipe<T> implements iPipe<T> {
     pipeMap = new Map<string, T>()
-    use = (pipe: T): string => {
-        const key = Math.random().toString(16).slice(-3)
-        this.pipeMap.set(key, pipe)
-        return key
+    use = (pipe: T | T[]): string | string[] => {
+        const _ = new Array<T>().concat(pipe)
+        const key: string[] = []
+        _.forEach(v => {
+            const __ = Math.random().toString(16).slice(-3)
+            this.pipeMap.set(__, v)
+            key.push(__)
+        })
+        return key.length === 1 ? key[0] : key
     }
-    eject = (key: string): boolean => {
-        return this.pipeMap.delete(key)
+    eject = (key: string | string[]): boolean | boolean[] => {
+        const _ = new Array<string>().concat(key)
+        const result: boolean[] = []
+        _.forEach(v => {
+            result.push(this.pipeMap.delete(v))
+        })
+        return result.length === 1 ? result[0] : result
     }
 }
 

@@ -1,3 +1,7 @@
+### 0.1.0
+- add use/eject with array
+- test passed: suffix
+
 ### 0.0.12
 - better type support
 

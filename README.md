@@ -20,7 +20,7 @@ API.init({
     enableAbort?: boolean | number, // abort & timeout
     pureResponse?: boolean, // default:false, whether resolved with Response.clone()
     // format: [response, pureResponse] or response
-    suffix?: string, // alpha test
+    suffix?: string, // like .do .json
 },{
     someApi:{
         urn: string | function, // build in function: urnParser
@@ -97,16 +97,18 @@ __Synchronous executed just before fetch and after internal core operation with 
 >function: (url: URL, config: BaseConfig, [body, params], [someApi, urn, config, baseConfig])=>any
 >>__only the change to url & config will effect,__ others are just copy from your init/create config & call params
 
-Api.request.eject(key)
->remove specific function from request pipeline
+const bool = Api.request.eject(key)
+>remove specific function from request pipeline, return true means success
 
 const key = Api.response.use(function)
 __Asynchronous executed just after get Response__
 >function: (response: Response, request: Request, [resolve, reject])=>any
 >>__invoke resolve | reject to end pipeline__
 
-Api.response.eject(key)
->remove specific function from response pipeline
+const bool = Api.response.eject(key)
+>remove specific function from response pipeline, return true means success
+
+_pass array get array_
 
 `control`
 
@@ -151,10 +153,8 @@ Api.post(body, url)
 
 - dynamic config when invoke Api.someApi(body, param, config)
 - globalThis
-- suffix
 - runtime nodejs
 - params one more usage
-- use/eject with array
 
 ---
 Thanks to MDN, whatwg and Many blogers.

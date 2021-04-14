@@ -36,7 +36,14 @@ describe('Simplified Fetch Other Test', () => {
                 pipeUser: {
                     urn: undefined,
                     config: undefined,
-                }
+                },
+                suffix: {
+                    urn: '/test',
+                    config: {
+                        method: 'GET',
+                        suffix: '.test',
+                    }
+                },
             })
         })
         const _ = await page.evaluate(() => {
@@ -188,28 +195,27 @@ describe('Simplified Fetch Other Test', () => {
                     Reflect.deleteProperty(config, 'body')
                 })
                 final.reqL = Api.request.pipeMap.size
-                const key2 = Api.response.use(async (response, request, [resolve, reject]) => {
+                const keys = Api.response.use([async (response, request, [resolve, reject]) => {
                     final.bodyUsed = response.bodyUsed
                     const res = await response.json()
                     final.bodyUndefined = request.body === undefined
                     final.ok = response.ok
                     final.used = response.bodyUsed
                     resolve(res.map(obj => ({ test: 'test' })))
-                })
-                const key3 = Api.response.use(() => {
+                }, () => {
                     console.log('Gotcha!')
                     final.gotcha = true
-                })
+                }])
                 final.resL = Api.response.pipeMap.size
                 const result = await Api.pipeUser({ whatever: 'whatever' })
                 final.result = result
                 Api.request.eject(key)
-                Api.response.eject(key2)
-                Api.response.eject(key3)
+                Api.response.eject(keys)
+                final.resL2 = Api.response.pipeMap.size
                 return final
             })
             expect(_).toEqual({
-                reqL: 1, resL: 2,
+                reqL: 1, resL: 2, resL2: 0,
                 bodyUndefined: true,
                 bodyUsed: false,
                 ok: true,
@@ -248,6 +254,53 @@ describe('Simplified Fetch Other Test', () => {
     })
 
     describe('suffix', () => {
-        test.todo('suffix')
+        test('just suffix', async () => {
+            const _ = await page.evaluate(async () => {
+                const final = {}
+                const key = Api.request.use((url, config) => {
+                    let regExp = /test/g
+                    final.pathname = url.pathname
+                    final.len = [...url.pathname.matchAll(regExp)].length
+                    return true
+                })
+                try {
+                    const result = await Api.suffix()
+                    final.result = result
+                } catch (error) {
+                    final.error = error
+                }
+                Api.request.eject(key)
+                return final
+            })
+            expect(_).toEqual({
+                pathname: '/test.test',
+                len: 2,
+                error: true
+            })
+        })
+        test('suffix with urlSearchParam', async () => {
+            const _ = await page.evaluate(async () => {
+                const final = {}
+                const key = Api.request.use((url, config) => {
+                    let regExp = /test/g
+                    final.url = url.pathname + url.search
+                    final.len = [...(url.pathname + url.search).matchAll(regExp)].length
+                    return true
+                })
+                try {
+                    const result = await Api.suffix({ test: 'test' })
+                    final.result = result
+                } catch (error) {
+                    final.error = error
+                }
+                Api.request.eject(key)
+                return final
+            })
+            expect(_).toEqual({
+                url: '/test.test?test=test',
+                len: 4,
+                error: true
+            })
+        })
     })
 })

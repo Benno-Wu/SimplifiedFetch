@@ -23,8 +23,9 @@ RequestInit [MDN](https://developer.mozilla.org/en-US/docs/Web/API/Request/Reque
 |  --- | --- | --- |
 |  [baseURL?](./simplified-fetch.baseconfig.baseurl.md) | string \| URL | <i>(Optional)</i> basic url |
 |  [bodyMixin?](./simplified-fetch.baseconfig.bodymixin.md) | [BodyMixin](./simplified-fetch.bodymixin.md) | <i>(Optional)</i> how the response will be transformed |
-|  [enableAbort?](./simplified-fetch.baseconfig.enableabort.md) | boolean \| number | <b><i>(BETA)</i></b> <i>(Optional)</i> abort fetch, enable by given true or number(means timeout) |
+|  [enableAbort?](./simplified-fetch.baseconfig.enableabort.md) | boolean \| number | <i>(Optional)</i> abort fetch, enable by given true or number(means timeout) |
 |  [method?](./simplified-fetch.baseconfig.method.md) | [Methods](./simplified-fetch.methods.md) | <i>(Optional)</i> default method |
 |  [newName?](./simplified-fetch.baseconfig.newname.md) | string | <i>(Optional)</i> name to access the SimplifiedFetch on globalThis |
-|  [pureResponse?](./simplified-fetch.baseconfig.pureresponse.md) | boolean | <b><i>(BETA)</i></b> <i>(Optional)</i> set ture will get return Response.clone() |
+|  [pureResponse?](./simplified-fetch.baseconfig.pureresponse.md) | boolean | <i>(Optional)</i> set ture will get return Response.clone() |
+|  [suffix?](./simplified-fetch.baseconfig.suffix.md) | string | <i>(Optional)</i> add suffix for url |
 
