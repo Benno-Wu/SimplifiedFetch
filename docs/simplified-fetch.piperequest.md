@@ -9,7 +9,13 @@ Synchronous executed after internal core operation with url &amp; config, just b
 <b>Signature:</b>
 
 ```typescript
-export declare type PipeRequest = (url: URL, config: BaseConfig, param: [bodyAsParams | undefined, Array<unknown> | undefined], configs: [string, URN, BaseConfig, BaseConfig]) => boolean;
+export declare type PipeRequest = (url: URL, config: BaseConfig, param: [bodyAsParams | undefined, Array<unknown> | undefined], configs: [string, URN, BaseConfig, BaseConfig]) => unknown;
 ```
 <b>References:</b> [BaseConfig](./simplified-fetch.baseconfig.md)<!-- -->, [bodyAsParams](./simplified-fetch.bodyasparams.md)<!-- -->, [URN](./simplified-fetch.urn.md)
+
+## Remarks
+
+only the change to url &amp; config will effect, others are just copy from your init/create config &amp; call params.
+
+function return true or any message, someApi will immediate reject with that, don't forget to catch it.
 

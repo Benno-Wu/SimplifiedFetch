@@ -11,3 +11,8 @@ Asynchronous executed just after getting the response
 ```typescript
 export declare type PipeResponse = (response: Response, request: Request, funcs: [(value: unknown) => void, (reason?: any) => void]) => Promise<unknown>;
 ```
+
+## Remarks
+
+invoke resolve \| reject to end pipeline
+

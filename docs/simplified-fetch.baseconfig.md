@@ -23,6 +23,7 @@ RequestInit [MDN](https://developer.mozilla.org/en-US/docs/Web/API/Request/Reque
 |  --- | --- | --- |
 |  [baseURL?](./simplified-fetch.baseconfig.baseurl.md) | string \| URL | <i>(Optional)</i> basic url |
 |  [bodyMixin?](./simplified-fetch.baseconfig.bodymixin.md) | [BodyMixin](./simplified-fetch.bodymixin.md) | <i>(Optional)</i> how the response will be transformed |
+|  [custom?](./simplified-fetch.baseconfig.custom.md) | any | <i>(Optional)</i> any, used for custom config, reuse it in pipeline |
 |  [enableAbort?](./simplified-fetch.baseconfig.enableabort.md) | boolean \| number | <i>(Optional)</i> abort fetch, enable by given true or number(means timeout) |
 |  [method?](./simplified-fetch.baseconfig.method.md) | [Methods](./simplified-fetch.methods.md) | <i>(Optional)</i> default method |
 |  [newName?](./simplified-fetch.baseconfig.newname.md) | string | <i>(Optional)</i> name to access the SimplifiedFetch on globalThis |

@@ -49,6 +49,10 @@ export interface BaseConfig extends RequestInit {
      * .do .json
      */
     suffix?: string
+    /**
+     * any, used for custom config, reuse it in pipeline
+     */
+    custom?: any
 }
 
 /**
@@ -74,7 +78,10 @@ export type BodyMixin = 'arrayBuffer' | 'blob' | 'formData' | 'json' | 'text'
  * @public
  */
 export interface APIConfig {
-    [propName: string]: request
+    /**
+     * support full config and just string
+     */
+    [propName: string]: request | string
 }
 
 /**
@@ -164,20 +171,26 @@ export type PipeUnion = PipeRequest | PipeResponse
 /**
  * Synchronous executed after internal core operation with url & config, just before fetch
  * @param url - {@link https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch | MDN}
- * @param config - {@link https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch | MDN}
+ * @param config - Merged Config {@link https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch | MDN}
  * @param param - [body, params], Api.someApi(body, params) {@link apiF}
  * @param configs -[api, urn, config, baseConfig] {@link BaseConfig} {@link APIConfig}
+ * @remarks
+ * only the change to url & config will effect, others are just copy from your init/create config & call params.
+ * 
+ * function return true or any message, someApi will immediate reject with that, don't forget to catch it.
  * @public
  */
 export type PipeRequest = (url: URL, config: BaseConfig,
     param: [bodyAsParams | undefined, Array<unknown> | undefined],
-    configs: [string, URN, BaseConfig, BaseConfig]) => boolean
+    configs: [string, URN, BaseConfig, BaseConfig]) => unknown
 
 /**
  * Asynchronous executed just after getting the response
  * @param response - {@link https://developer.mozilla.org/en-US/docs/Web/API/Response | MDN}
  * @param request - {@link https://developer.mozilla.org/en-US/docs/Web/API/Request | MDN}
  * @param funcs - [resolve, reject] end the pipeline when needed
+ * @remarks
+ * invoke resolve | reject to end pipeline
  * @public
  */
 export type PipeResponse = (response: Response, request: Request,
@@ -190,14 +203,16 @@ export type PipeResponse = (response: Response, request: Request,
  * {@link https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams | MDN}
  * @public
  */
-export type bodyAsParams = string | Object | Array<unknown>
+export type bodyAsParams = string | Object | Array<unknown> | BodyInit
 
 /**
  * the access of configed fetch
- * @typeParam returns - the type of return
+ * @typeParam Body - the type of param0 body
+ * @typeParam Param - the type of param1 param
+ * @typeParam Return - the type of return
  * @param body - {@link bodyAsParams}
  * @param params - use for url building, will extended
  * @returns Promise\<returns\>
  * @public
  */
-export type apiF<returns> = (body?: bodyAsParams, params?: Array<unknown>) => Promise<returns>
+export type apiF<Body, Param, Return> = (body?: bodyAsParams | Body, params?: Array<unknown> | Param) => Promise<Return>

@@ -85,7 +85,10 @@ class Api implements iApi {
      * @param baseConfig - {@link BaseConfig}
      */
     constructor(apis: APIConfig, baseConfig: BaseConfig = API.baseConfig) {
-        for (const [api, { urn, config = {} }] of Object.entries(apis)) {
+        for (const [api, request] of Object.entries(apis)) {
+            let urn: URN, config: BaseConfig = {};
+            if (typeof request === 'string') urn = request
+            else ({ urn, config = {} } = request)
 
             // pipe request
             // issue: unable to be async?
@@ -107,7 +110,7 @@ class Api implements iApi {
 
             (<any>this)[api] = (body?: bodyAsParams, params?: Array<unknown>): Promise<unknown> => {
                 // controller of both pipelines
-                let isEnd = false
+                let isEnd: unknown = false
 
                 const urlMerged = mergeURL(urn, configMerged, params)
                 urlMerged.pathname += configMerged?.suffix ?? ''
@@ -295,7 +298,7 @@ function getURL(url: URL, config: BaseConfig, body: bodyAsParams): URL {
         if (bodyType === '[object Object]' || Array.isArray(body)) {
             body = JSON.stringify(body)
         }
-        config.body = <any>body
+        config.body = body as BodyInit
     }
     return url
 }

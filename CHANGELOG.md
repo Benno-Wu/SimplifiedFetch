@@ -1,3 +1,9 @@
+### 0.2.0
+_notice_: apiF big change, read docs bofore update.
+- add custom on BaseConfig for custom config
+- add APIConfig support: someApi: string
+- batter typed
+
 ### 0.1.0
 - add use/eject with array
 - test passed: suffix

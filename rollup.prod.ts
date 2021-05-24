@@ -49,4 +49,17 @@ export default [{
         }),
         uglify(),
     ]
+}, {// common pipes for test
+    input: './src/pipes.ts',
+    output: {
+        file: 'test/pipes.js',
+        format: 'iife',
+        name: 'pipes',
+    },
+    plugins: [
+        del({ targets: ['./test/pipes.js'] }),
+        typescript({
+            tsconfig: false,
+        })
+    ]
 }]

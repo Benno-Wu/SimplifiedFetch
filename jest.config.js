@@ -160,6 +160,7 @@ module.exports = {
   testRegex: [
     // "base\.test\.js",
     // "other\.test\.js",
+    "0.5",
   ],
 
   // This option allows the use of a custom results processor

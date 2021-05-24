@@ -9,7 +9,7 @@ the access of configed fetch
 <b>Signature:</b>
 
 ```typescript
-export declare type apiF<returns> = (body?: bodyAsParams, params?: Array<unknown>) => Promise<returns>;
+export declare type apiF<Body, Param, Return> = (body?: bodyAsParams | Body, params?: Array<unknown> | Param) => Promise<Return>;
 ```
 <b>References:</b> [bodyAsParams](./simplified-fetch.bodyasparams.md)
 

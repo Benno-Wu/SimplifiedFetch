@@ -1,6 +1,6 @@
 # Simplified Fetch
 
-Encapsulate a unified API request object to simplify the use of [fetch](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API)
+Encapsulate a unified API request object to simplify the use of [fetch](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) and enhance it!
 
 > npm i simplified-fetch
 
@@ -21,12 +21,14 @@ API.init({
     pureResponse?: boolean, // default:false, whether resolved with Response.clone()
     // format: [response, pureResponse] or response
     suffix?: string, // like .do .json
+    custom?: any, // anything you want to put inside and use it in pipeline
 },{
     someApi:{
         urn: string | function, // build in function: urnParser
         config?: BaseConfig, // same as the above first param
     },
     someApi2:{...},
+    someApi3:'/xxx', // just string as urn supported
 })
 
 // somewhere.js
@@ -94,7 +96,7 @@ const [constroller, signal] = Api.aborts.someApi
 - ### pipeline & control
 const key = Api.request.use(function)
 __Synchronous executed just before fetch and after internal core operation with url & config__
->function: (url: URL, config: BaseConfig, [body, params], [someApi, urn, config, baseConfig])=>any
+>function: (url: URL, config: BaseConfig, [body, params], [someApi, urn, config, baseConfig]) => unknown
 >>__only the change to url & config will effect,__ others are just copy from your init/create config & call params
 
 const bool = Api.request.eject(key)
@@ -102,7 +104,7 @@ const bool = Api.request.eject(key)
 
 const key = Api.response.use(function)
 __Asynchronous executed just after get Response__
->function: (response: Response, request: Request, [resolve, reject])=>any
+>function: (response: Response, request: Request, [resolve, reject]) => Promise<unknown\>
 >>__invoke resolve | reject to end pipeline__
 
 const bool = Api.response.eject(key)
@@ -121,7 +123,7 @@ invoke resolve | reject to end pipeline
 - ### body
 __Failed to execute 'fetch' on 'Window': Request with ！GET/HEAD！ method cannot have body.__
 
-so body will be auto transformed by internal function to string, append to the search of URL (for type Object, FormData, urlsearchParams), or append to the pathname of URL (for type Array, String, Number).
+so body will be auto transformed by internal function to string, append to the search of URL (for type Object, FormData, URLSearchParams), or append to the pathname of URL (for type Array, String, Number).
 
 other methods: Object and Array will be auto wrapped by JSON.stringfy()
 
@@ -155,6 +157,7 @@ Api.post(body, url)
 - globalThis
 - runtime nodejs
 - params one more usage
+- use/eject pipe with order
 
 ---
 Thanks to MDN, whatwg and Many blogers.
