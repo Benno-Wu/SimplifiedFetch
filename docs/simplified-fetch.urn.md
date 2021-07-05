@@ -4,7 +4,7 @@
 
 ## URN type
 
-rest part of the fetch url
+rest part of the fetch url, could be a function like [urnParser](./simplified-fetch.urnparser.md)
 
 <b>Signature:</b>
 
@@ -15,5 +15,5 @@ export declare type URN = string | URNParser;
 
 ## Remarks
 
-could be a function like [urnParser](./simplified-fetch.urnparser.md)
+the urn could be a complete URL
 

@@ -16,7 +16,7 @@ export interface iPipe<T>
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [eject](./simplified-fetch.ipipe.eject.md) | (key: string \| string\[\]) =&gt; boolean \| boolean\[\] | eject a function |
+|  [eject](./simplified-fetch.ipipe.eject.md) | (key: string \| string\[\]) =&gt; boolean \| boolean\[\] | eject function(s) |
 |  [pipeMap](./simplified-fetch.ipipe.pipemap.md) | Map&lt;string, T&gt; | local ordered Map |
-|  [use](./simplified-fetch.ipipe.use.md) | (pipe: T \| T\[\]) =&gt; string \| string\[\] | push a function |
+|  [use](./simplified-fetch.ipipe.use.md) | (...pipe: T\[\]) =&gt; string \| string\[\] | push function(s) |
 

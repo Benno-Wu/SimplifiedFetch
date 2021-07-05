@@ -16,3 +16,5 @@ enableAbort?: boolean | number;
 
 [MDN](https://developer.mozilla.org/en-US/docs/Web/API/AbortController)
 
+not supported in dynamic config
+

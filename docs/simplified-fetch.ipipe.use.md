@@ -4,10 +4,10 @@
 
 ## iPipe.use property
 
-push a function
+push function(s)
 
 <b>Signature:</b>
 
 ```typescript
-use: (pipe: T | T[]) => string | string[];
+use: (...pipe: T[]) => string | string[];
 ```

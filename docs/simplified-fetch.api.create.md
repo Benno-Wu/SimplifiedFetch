@@ -9,7 +9,7 @@ create and return the new Api
 <b>Signature:</b>
 
 ```typescript
-static create(baseConfig: BaseConfig, apis: APIConfig): iApi;
+static create(baseConfig: BaseConfig, apis: APIConfig<Record<string, request>>): iApi;
 ```
 
 ## Parameters
@@ -17,7 +17,7 @@ static create(baseConfig: BaseConfig, apis: APIConfig): iApi;
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  baseConfig | [BaseConfig](./simplified-fetch.baseconfig.md) | [BaseConfig](./simplified-fetch.baseconfig.md) |
-|  apis | [APIConfig](./simplified-fetch.apiconfig.md) | [APIConfig](./simplified-fetch.apiconfig.md) |
+|  apis | [APIConfig](./simplified-fetch.apiconfig.md)<!-- -->&lt;Record&lt;string, [request](./simplified-fetch.request.md)<!-- -->&gt;&gt; | [APIConfig](./simplified-fetch.apiconfig.md) |
 
 <b>Returns:</b>
 

@@ -9,7 +9,7 @@ Asynchronous executed just after getting the response
 <b>Signature:</b>
 
 ```typescript
-export declare type PipeResponse = (response: Response, request: Request, funcs: [(value: unknown) => void, (reason?: any) => void]) => Promise<unknown>;
+export declare type PipeResponse = (response: Response, request: Request, controller: [(value: unknown) => void, (reason?: any) => void]) => Promise<unknown> | unknown;
 ```
 
 ## Remarks

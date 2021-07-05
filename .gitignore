@@ -6,5 +6,4 @@ bin
 polyfill
 !src/polyfill
 node_modules
-test/src
 temp

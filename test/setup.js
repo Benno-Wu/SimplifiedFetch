@@ -39,7 +39,7 @@ beforeAll(async () => {
 afterAll(async () => {
     // jest.setTimeout = 5s, don't greater then 5000, or change the config
     // await sleep(3000)
-    await page.waitForTimeout(3000)
+    // await page.waitForTimeout(3000)
     await browser.close()
 })
 

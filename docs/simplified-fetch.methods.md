@@ -4,7 +4,7 @@
 
 ## Methods type
 
-Http request methods
+Http(s) request methods
 
 <b>Signature:</b>
 

@@ -88,6 +88,7 @@ describe('Simplified Fetch Other Test', () => {
                     await Api.abortUser()
                 } catch (error) {
                     // unable to JSON.stringfy()
+                    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/JSON/stringify#description
                     // Object.getOwnPropertyDescriptors(signal)={} 
                     return [{ name: error.name, message: error.message }, { aborted: signal.aborted, timeout: signal.timeout }]
                 }
@@ -195,7 +196,7 @@ describe('Simplified Fetch Other Test', () => {
                     Reflect.deleteProperty(config, 'body')
                 })
                 final.reqL = Api.request.pipeMap.size
-                const keys = Api.response.use([async (response, request, [resolve, reject]) => {
+                const keys = Api.response.use(async (response, request, [resolve, reject]) => {
                     final.bodyUsed = response.bodyUsed
                     const res = await response.json()
                     final.bodyUndefined = request.body === undefined
@@ -205,7 +206,7 @@ describe('Simplified Fetch Other Test', () => {
                 }, () => {
                     console.log('Gotcha!')
                     final.gotcha = true
-                }])
+                })
                 final.resL = Api.response.pipeMap.size
                 const result = await Api.pipeUser({ whatever: 'whatever' })
                 final.result = result

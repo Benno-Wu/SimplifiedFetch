@@ -35,6 +35,7 @@ export interface BaseConfig extends RequestInit {
      * @remarks
      * {@link https://developer.mozilla.org/en-US/docs/Web/API/AbortController | MDN}
      * 
+     * not supported in dynamic config
      * @defaultValue `false`
      */
     enableAbort?: boolean | number
@@ -56,7 +57,7 @@ export interface BaseConfig extends RequestInit {
 }
 
 /**
- * Http request methods
+ * Http(s) request methods
  * @remarks
  * {@link https://fetch.spec.whatwg.org/#concept-method | spec}
  * @public
@@ -74,21 +75,21 @@ export type BodyMixin = 'arrayBuffer' | 'blob' | 'formData' | 'json' | 'text'
 /**
  * config of each api
  * @param key - access on Api to fetch
- * @param request - {@link request}
+ * @param value - {@link request} | {@link URN}
  * @public
  */
-export interface APIConfig {
+export type APIConfig<apis> = {
     /**
-     * support full config and just string
+     * support full config and URN
      */
-    [propName: string]: request | string
+    [api in keyof apis]: request
 }
 
 /**
  * config of fetch
  * @public
  */
-export type request = {
+export type request = URN | {
     /**
      * {@link URN}
      */
@@ -96,25 +97,34 @@ export type request = {
     /**
      * {@link BaseConfig}
      */
-    config?: BaseConfig
+    config?: Omit<BaseConfig, 'newName'>
 }
 
 /**
- * rest part of the fetch url
+ * rest part of the fetch url, could be a function like {@link urnParser}
  * @remarks
- * could be a function like {@link urnParser}
+ * the urn could be a complete URL
  * @public
  */
 export type URN = string | URNParser
-
 /**
- * function which parser the urn with prarms
+ * params之所以是any是因为URN，这个func要这个参数，再组合出最终url，一来二去就是any了
+ * 尝试过使用unknown | Record<keyof any, unknown>
+ * 但是apiF的设计是无所谓这里param
+ * 所以在约束谁？约束在init/create时，实现APIConfig<apis>时
+ * need more work?
+ */
+/**
+ * parser the urn with prarms
  * @public
  */
-export type URNParser = (params?: Array<unknown>) => string
+export type URNParser = (params?: any) => string
 
 /**
- * pipe Map<function> which operate Request & Response
+ * get AbortController & AbortSignal via [controller, signal]= Api.aborts.someApi
+ * {@link iAborts}
+ * 
+ * pipe: Map<function> which operates Request & Response
  * {@link PipeRequest}
  * {@link PipeResponse}
  * @public
@@ -125,7 +135,7 @@ export interface iApi {
      */
     aborts: iAborts
     /**
-     * Synchronous executed after internal core operation with url & config, just before fetch
+     * Asynchronous executed after internal core operation with url & config, just before fetch
      * {@link PipeRequest}
      */
     request: iPipe<PipeRequest>
@@ -141,6 +151,8 @@ export interface iApi {
  * @public
  */
 export type iAborts = Record<string, [AbortController, AbortSignal]>
+// todo how to type this: Api.aborts.[hint], consider usage
+// export type iAborts<apis> = { [api in keyof apis]: [AbortController, AbortSignal] }
 
 /**
  * manage the functions which pipe the request or response
@@ -153,25 +165,25 @@ export interface iPipe<T> {
      */
     pipeMap: Map<string, T>
     /**
-     * push a function
-     * @param pipe - function as pipe
-     * @returns key for eject
+     * push function(s)
+     * @param pipe - function(s) as pipe(s)
+     * @returns key(s) for eject
      */
-    use: (pipe: T | T[]) => string | string[]
+    use: (...pipe: T[]) => string | string[]
     /**
-     * eject a function
-     * @param key - unique key for used function
+     * eject function(s)
+     * @param key - unique key(s) for used function(s)
      * @returns has & eject success?
      */
     eject: (key: string | string[]) => boolean | boolean[]
 }
 
-export type PipeUnion = PipeRequest | PipeResponse
+type PipeUnion = PipeRequest | PipeResponse
 
 /**
- * Synchronous executed after internal core operation with url & config, just before fetch
+ * Asynchronous executed after internal core operation with url & config, just before fetch
  * @param url - {@link https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch | MDN}
- * @param config - Merged Config {@link https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch | MDN}
+ * @param config - Final Config {@link https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch | MDN}
  * @param param - [body, params], Api.someApi(body, params) {@link apiF}
  * @param configs -[api, urn, config, baseConfig] {@link BaseConfig} {@link APIConfig}
  * @remarks
@@ -181,20 +193,20 @@ export type PipeUnion = PipeRequest | PipeResponse
  * @public
  */
 export type PipeRequest = (url: URL, config: BaseConfig,
-    param: [bodyAsParams | undefined, Array<unknown> | undefined],
+    param: [bodyAsParams | undefined, any | undefined],
     configs: [string, URN, BaseConfig, BaseConfig]) => unknown
 
 /**
  * Asynchronous executed just after getting the response
  * @param response - {@link https://developer.mozilla.org/en-US/docs/Web/API/Response | MDN}
  * @param request - {@link https://developer.mozilla.org/en-US/docs/Web/API/Request | MDN}
- * @param funcs - [resolve, reject] end the pipeline when needed
+ * @param controller - [resolve, reject] end the pipeline when needed
  * @remarks
  * invoke resolve | reject to end pipeline
  * @public
  */
 export type PipeResponse = (response: Response, request: Request,
-    funcs: [(value: unknown) => void, (reason?: any) => void]) => Promise<unknown>
+    controller: [(value: unknown) => void, (reason?: any) => void]) => Promise<unknown> | unknown
 
 /**
  * body of fetch
@@ -203,16 +215,22 @@ export type PipeResponse = (response: Response, request: Request,
  * {@link https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams | MDN}
  * @public
  */
-export type bodyAsParams = string | Object | Array<unknown> | BodyInit
-
+export type bodyAsParams = string | object | Array<unknown> | BodyInit
 /**
  * the access of configed fetch
  * @typeParam Body - the type of param0 body
- * @typeParam Param - the type of param1 param
+ * @typeParam Param - the type of param1 params
  * @typeParam Return - the type of return
  * @param body - {@link bodyAsParams}
- * @param params - use for url building, will extended
+ * @param params - use for url building
  * @returns Promise\<returns\>
+ * @privateRemarks
+ * wanted: export type apiF<Body, Return>  & type apiF<Param, Return> and more
+ * first thing i want to do, it's something like Function Overloads, Generics are optional,
+ * so my search keywords: optional generics, find some issues: #10571, #26242...
+ * Suddenly i realize, how to infer in this situation: apiF<Body>, apiF<Param>, usage apiF<any>, which is any?
+ * So, optional Generics need full write with some skip, which also means no optional, just give it any.
+ * Default generic type variables #2175 may help a little.
  * @public
  */
-export type apiF<Body, Param, Return> = (body?: bodyAsParams | Body, params?: Array<unknown> | Param) => Promise<Return>
+export type apiF<Body, Param, Return> = (body?: bodyAsParams | Body, params?: any | Param, config?: Omit<BaseConfig, "enableAbort" | 'newName'>) => Promise<Return>

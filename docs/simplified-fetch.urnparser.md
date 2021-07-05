@@ -9,25 +9,27 @@ parse the template strings with params
 <b>Signature:</b>
 
 ```typescript
-urnParser: (template: Array<string>, ...placeholder: Array<number>) => URNParser
+urnParser: (template: Array<string>, ...placeholder: Array<number | string>) => URNParser
 ```
 
 ## Remarks
 
 function base on Template literals (Template strings) [ES6 Template literals](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals)
 
-you do can use the string type as placehloder, and give an Object as params, match them with key string. But the way it used would look like: urnParser`/${'key1'}/${'key2'}`<!-- -->, Api.someApi(body, {<!-- -->key1:'',key2:''<!-- -->}<!-- -->) Anyway, need better idea.
+you do can use the string type as placehloder, and give an object as params, match them with key string. But the way it used would look like: urnParser`/${'key1'}/${'key2'}`<!-- -->, Api.someApi(body, {<!-- -->key1:'',key2:''<!-- -->}<!-- -->)
+
+Anyway, need better idea.
 
 ## Example
 
 
 ```ts
-// init
+// init|create
 someApi:{
   urn: urnParser`/xxx/${0}/${1}`
 }
 // somewhere
-Api.someApi(body,['user', [1,2,3]])
+Api.someApi(body, ['user', [1,2,3]])
 // getUrl: /xxx/user/1,2,3
 
 ```

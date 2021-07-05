@@ -9,7 +9,7 @@ init Api or \[newName\] on globalThis
 <b>Signature:</b>
 
 ```typescript
-static init(baseConfig: BaseConfig, apis: APIConfig): void;
+static init(baseConfig: BaseConfig, apis: APIConfig<Record<string, request>>): void;
 ```
 
 ## Parameters
@@ -17,7 +17,7 @@ static init(baseConfig: BaseConfig, apis: APIConfig): void;
 |  Parameter | Type | Description |
 |  --- | --- | --- |
 |  baseConfig | [BaseConfig](./simplified-fetch.baseconfig.md) | [BaseConfig](./simplified-fetch.baseconfig.md) |
-|  apis | [APIConfig](./simplified-fetch.apiconfig.md) | [APIConfig](./simplified-fetch.apiconfig.md) |
+|  apis | [APIConfig](./simplified-fetch.apiconfig.md)<!-- -->&lt;Record&lt;string, [request](./simplified-fetch.request.md)<!-- -->&gt;&gt; | [APIConfig](./simplified-fetch.apiconfig.md) |
 
 <b>Returns:</b>
 

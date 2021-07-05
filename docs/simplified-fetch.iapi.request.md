@@ -4,7 +4,7 @@
 
 ## iApi.request property
 
-Synchronous executed after internal core operation with url &amp; config, just before fetch [PipeRequest](./simplified-fetch.piperequest.md)
+Asynchronous executed after internal core operation with url &amp; config, just before fetch [PipeRequest](./simplified-fetch.piperequest.md)
 
 <b>Signature:</b>
 

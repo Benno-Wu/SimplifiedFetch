@@ -2,12 +2,16 @@
 
 [Home](./index.md) &gt; [simplified-fetch](./simplified-fetch.md) &gt; [APIConfig](./simplified-fetch.apiconfig.md)
 
-## APIConfig interface
+## APIConfig type
 
 config of each api
 
 <b>Signature:</b>
 
 ```typescript
-export interface APIConfig 
+export declare type APIConfig<apis> = {
+    [api in keyof apis]: request;
+};
 ```
+<b>References:</b> [request](./simplified-fetch.request.md)
+

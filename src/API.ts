@@ -1,14 +1,11 @@
-import { APIConfig, BaseConfig, bodyAsParams, iAborts, iApi, iPipe, PipeRequest, PipeResponse, URN, URNParser } from "./type&interface";
+import { objects, toString } from "./shares";
+import { APIConfig, BaseConfig, bodyAsParams, BodyMixin, iAborts, iApi, iPipe, PipeRequest, PipeResponse, request, URN, URNParser } from "./type&interface";
 
 /**
  * main entry to generate the SimplifiedFetch
  * @public
  */
 export default class API {
-    // baseConfig = {}
-    // constructor() {
-    //     Object.freeze(API.baseConfig)
-    // }
     /**
      * global basic config
      * @defaultValue
@@ -37,7 +34,7 @@ export default class API {
      * @param baseConfig - {@link BaseConfig}
      * @param apis - {@link APIConfig}
      */
-    static init(baseConfig: BaseConfig, apis: APIConfig) {
+    static init(baseConfig: BaseConfig, apis: APIConfig<Record<string, request>>) {
         let _: any = (function () {
             if (typeof globalThis === 'object' && globalThis) return globalThis
             if (typeof window === 'object' && window) return window
@@ -56,7 +53,7 @@ export default class API {
      * @param apis - {@link APIConfig}
      * @returns SimplifiedFetch
      */
-    static create(baseConfig: BaseConfig, apis: APIConfig): iApi {
+    static create(baseConfig: BaseConfig, apis: APIConfig<Record<string, request>>): iApi {
         return new Api(apis, mergeConfig(API.baseConfig, baseConfig))
     }
 }
@@ -84,11 +81,11 @@ class Api implements iApi {
      * @param apis - {@link APIConfig}
      * @param baseConfig - {@link BaseConfig}
      */
-    constructor(apis: APIConfig, baseConfig: BaseConfig = API.baseConfig) {
+    constructor(apis: APIConfig<Record<string, request>>, baseConfig: BaseConfig) {
         for (const [api, request] of Object.entries(apis)) {
             let urn: URN, config: BaseConfig = {};
-            if (typeof request === 'string') urn = request
-            else ({ urn, config = {} } = request)
+            if (typeof request === 'string' || typeof request === 'function') urn = request
+            else { ({ urn, config = {} } = request) }
 
             // pipe request
             // issue: unable to be async?
@@ -108,25 +105,27 @@ class Api implements iApi {
                 this.aborts[api] = [controller, signal]
             }
 
-            (<any>this)[api] = (body?: bodyAsParams, params?: Array<unknown>): Promise<unknown> => {
+            (<any>this)[api] = async (body?: bodyAsParams, params?: unknown, dynamicConfig: BaseConfig = {}) => {
                 // controller of both pipelines
                 let isEnd: unknown = false
 
-                const urlMerged = mergeURL(urn, configMerged, params)
-                urlMerged.pathname += configMerged?.suffix ?? ''
-                const urlFinal = body ? getURL(urlMerged, configMerged, body) : urlMerged
+                const configFinal = mergeConfig(configMerged, dynamicConfig)
+
+                const urlMerged = mergeURL(urn, configFinal, params)
+                urlMerged.pathname += configFinal?.suffix ?? ''
+                const urlFinal = body ? getURL(urlMerged, configFinal, body) : urlMerged
 
                 // pipe request
                 // too many parameters, but good for bug fix when people use this
                 for (const [key, func] of this.request.pipeMap) {
-                    if (!isEnd) {
-                        isEnd = func(urlFinal, configMerged, [body, params], [api, urn, config, baseConfig])
+                    if (!isEnd && typeof func === 'function') {
+                        isEnd = await func(urlFinal, configFinal, [body, params], [api, urn, config, baseConfig])
                     }
                 }
 
                 return new Promise((resolve, reject) => {
 
-                    if (!!isEnd) reject(isEnd)
+                    if (!!isEnd) { reject(isEnd); return }
                     const res = (_: unknown) => { isEnd = true; resolve(_) }
                     const rej = (_: unknown) => { isEnd = true; reject(_) }
 
@@ -138,13 +137,14 @@ class Api implements iApi {
                         setTimeout(() => controller.abort(), abort)
                     }
 
-                    const request = new Request(urlFinal.toString(), configMerged)
+                    const request = new Request(urlFinal.toString(), configFinal)
                     fetch(request)
                         .then(async response => {
 
                             // pipe response
                             for (const [key, func] of this.response.pipeMap) {
-                                await func(response.clone(), request, [res, rej])
+                                if (typeof func === 'function')
+                                    await func(response.clone(), request, [res, rej])
                                 if (!!isEnd) return
                             }
                             // too many parameters
@@ -152,7 +152,7 @@ class Api implements iApi {
                             //     async (result, func, index, array) => await func([resolve, reject], response, request, [result, index, array])
                             //     , undefined)
 
-                            processResponse([resolve, reject], response, configMerged?.bodyMixin, configMerged?.pureResponse)
+                            processResponse([resolve, reject], response, configFinal?.bodyMixin, configFinal?.pureResponse)
                         })
                         .catch(e => {
                             // https://developer.mozilla.org/en-US/docs/Web/API/DOMException
@@ -173,9 +173,12 @@ class Api implements iApi {
  * {@link iPipe}
  */
 class Pipe<T> implements iPipe<T> {
+    // update ts
+    // use private?
+    // orderedMap 二维数组?
+    // use(number, ...func) typeof numebr == number? order
     pipeMap = new Map<string, T>()
-    use = (pipe: T | T[]): string | string[] => {
-        const _ = new Array<T>().concat(pipe)
+    use = (..._: T[]): string | string[] => {
         const key: string[] = []
         _.forEach(v => {
             const __ = Math.random().toString(16).slice(-3)
@@ -201,9 +204,9 @@ class Pipe<T> implements iPipe<T> {
  * @param bodyMixin - {@link BodyMixin}
  * @param pure - get from config, whether resolve with Response.clone()
  */
-function processResponse([resolve, reject]: Array<Function>, response: Response, bodyMixin: string = 'json', pure: boolean = false) {
+function processResponse([resolve, reject]: Array<Function>, response: Response, bodyMixin: BodyMixin = 'json', pure: boolean = false) {
     const pureResponse: Response | undefined = pure ? response.clone() : undefined;
-    (<any>response)[bodyMixin]()
+    response[bodyMixin]()
         .then((res: unknown) => resolve(pure ? [res, pureResponse] : res))
     // .catch(reject)
 }
@@ -212,15 +215,24 @@ function processResponse([resolve, reject]: Array<Function>, response: Response,
  * merge globalConfig with localConfig
  * @param baseConfig - {@link BaseConfig}
  * @param newConfig - {@link BaseConfig}
+ * @remarks
+ * shallow copy custom when it's simple object, otherwise replace. 
  * @returns new object with final config
  */
 function mergeConfig(baseConfig: BaseConfig, newConfig: BaseConfig): BaseConfig {
     const headers = Object.assign({}, baseConfig?.headers, newConfig?.headers)
-    return {
-        ...baseConfig,
-        ...newConfig,
-        headers,
-    }
+    return (toString(baseConfig?.custom) === objects.Object || toString(newConfig?.custom) === objects.Object) ? {
+        ...baseConfig, ...newConfig, headers, custom: Object.assign({}, baseConfig?.custom, newConfig?.custom)
+    } : { ...baseConfig, ...newConfig, headers, }
+}
+
+/**
+ * merge all configs
+ * @param configs - array of {@link BaseConfig}
+ * @returns final config
+ */
+function mergeConfigs(...configs: BaseConfig[]) {
+    return configs.reduce((pre, cur, i, a) => mergeConfig(pre, cur), {})
 }
 
 /**
@@ -230,10 +242,12 @@ function mergeConfig(baseConfig: BaseConfig, newConfig: BaseConfig): BaseConfig 
  * @param params - Api.someApi(body, params), use for step: urnParser
  * @returns url wait to fetch
  */
-function mergeURL(urn: URN, config: BaseConfig, params?: Array<unknown>): URL {
+function mergeURL(urn: URN, config: BaseConfig, params?: unknown): URL {
     // todo: params now is just for urn when it's function. if urn isn't function, then auto parse params to string +=url.search
     // reason: body is just for body, if get wrong method, then parse. it is already done.
     // Both do the same thing, so which one first?
+
+    // todo params is simple obj, parse into urlSearchParam, add to search
 
     // https://developer.mozilla.org/en-US/docs/Web/API/URL/URL
     return new URL(typeof urn === 'function' ? urn(params) : urn, config?.baseURL ?? '')
@@ -247,7 +261,7 @@ function mergeURL(urn: URN, config: BaseConfig, params?: Array<unknown>): URL {
  * @returns final url and config for fetch
  */
 function getURL(url: URL, config: BaseConfig, body: bodyAsParams): URL {
-    const bodyType = Object.prototype.toString.call(body)
+    const bodyType = toString(body)
     // reasons: Failed to execute 'fetch' on 'Window': Request with ！GET/HEAD！ method cannot have body.
     if (['GET', 'HEAD'].includes(config.method!.toUpperCase())) {
         // situation: 'xxx',xxx/','xxx/?','xxx/?a=1','xxx/?a=1&',
@@ -256,12 +270,12 @@ function getURL(url: URL, config: BaseConfig, body: bodyAsParams): URL {
         url.search += search && url.search.slice(-1)[0] !== '&' ? '&' : ''
 
         switch (bodyType) {
-            case '[object Object]':
+            case objects.Object:
                 // issue: bug when strange body comes
                 // @ts-ignore
                 url.search += new URLSearchParams(body).toString()
                 break;
-            case '[object FormData]':
+            case objects.FormData:
                 // https://developer.mozilla.org/en-US/docs/Web/API/FormData
                 /*
                 You can also pass it directly to the URLSearchParams constructor
@@ -272,22 +286,23 @@ function getURL(url: URL, config: BaseConfig, body: bodyAsParams): URL {
                 // https://github.com/microsoft/TypeScript/issues/30584
                 url.search += new URLSearchParams(body).toString()
                 break;
-            case '[object URLSearchParams]':
+            case objects.URLSearchParams:
                 url.search += body.toString()
                 break
             // this will be done automatically on Chromium
+            // explain: x.search, get:'', x.search+='a=1', a.search, get:'?a=1'
             // todo: more compatibility Test?
             // if (search) {
             //     url.search = '?'.concat(url.search)
             // }
 
-            case '[object Array]':
+            case objects.Array:
                 url.pathname += `/${body.toString()}`
                 break;
-            case '[object String]':
+            case objects.String:
                 url.pathname += `/${body.toString()}`
                 break;
-            case '[object Number]':
+            case objects.Number:
                 url.pathname += `/${body.toString()}`
                 break;
         }
@@ -295,7 +310,7 @@ function getURL(url: URL, config: BaseConfig, body: bodyAsParams): URL {
         //  obj2string,exclude
         //  ['[object Blob]','[object ArrayBuffer]','[object FormData]',
         //  '[object URLSearchParams]','[object ReadableStream]','[object String]']
-        if (bodyType === '[object Object]' || Array.isArray(body)) {
+        if (bodyType === objects.Object || Array.isArray(body)) {
             body = JSON.stringify(body)
         }
         config.body = body as BodyInit
@@ -308,12 +323,12 @@ function getURL(url: URL, config: BaseConfig, body: bodyAsParams): URL {
  * 
  * @example
  * ```ts
- * // init
+ * // init|create
  * someApi:{
  *   urn: urnParser`/xxx/${0}/${1}`
  * }
  * // somewhere
- * Api.someApi(body,['user', [1,2,3]])
+ * Api.someApi(body, ['user', [1,2,3]])
  * // getUrl: /xxx/user/1,2,3
  * ```
  * @param template - template strings
@@ -324,16 +339,16 @@ function getURL(url: URL, config: BaseConfig, body: bodyAsParams): URL {
  * function base on Template literals (Template strings)
  * {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals | ES6 Template literals}
  * 
- * you do can use the string type as placehloder, and give an Object as params, match them with key string.
+ * you do can use the string type as placehloder, and give an object as params, match them with key string.
  * But the way it used would look like: urnParser`/${'key1'}/${'key2'}`, Api.someApi(body, \{key1:'',key2:''\})
+ * 
  * Anyway, need better idea.
  * 
  * @public
  */
-export const urnParser = (template: Array<string>, ...placeholder: Array<number>): URNParser => {
-    return (params?: Array<unknown>): string => {
-        return template.reduce((previousValue, currentValue, index) => {
-            return previousValue + currentValue + (params?.[placeholder[index]] ?? '')
-        }, '')
-    }
+export const urnParser = (template: Array<string>, ...placeholder: Array<number | string>): URNParser => {
+    return params => template.reduce((previousValue, currentValue, index) => {
+        // https://github.com/microsoft/TypeScript/issues/10530
+        return previousValue + currentValue + (params?.[placeholder[index]] ?? '')
+    }, '')
 }

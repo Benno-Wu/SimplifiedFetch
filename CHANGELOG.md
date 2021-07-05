@@ -1,10 +1,20 @@
+### 0.4.0
+#### ⚠ _notice_: big change, read bofore update.
+- pipeRequest is async now
+- support dynamic config when invoke Api.someApi(body, param, config)
+- fix wrong design of param on pipeline.use
+- publish iife
+- much better typed
+- uglify->terser, causes bug on pipeline, when test with iife.
+
 ### 0.2.0
-_notice_: apiF big change, read docs bofore update.
+#### ⚠ _notice_: apiF big change, read bofore update.
 - add custom on BaseConfig for custom config
 - add APIConfig support: someApi: string
-- batter typed
+- better typed
 
 ### 0.1.0
+#### ⚠ _notice_: big change, read bofore update.
 - add use/eject with array
 - test passed: suffix
 
@@ -36,7 +46,7 @@ new ideas
 - use/eject with array
 
 ### 0.0.6
-_notice:_ pipeline will fixed soon and come with new design of control
+_notice:_ pipeline will be fixed soon and come with new design of control
 - test passed: abort, pureResponse
 
 new ideas

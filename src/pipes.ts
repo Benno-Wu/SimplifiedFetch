@@ -6,5 +6,11 @@ export const NoRequest: PipeRequest = (url, config, [body, params], [api, urn, c
 }
 
 export const RequestLogger: PipeRequest = (url, config, [body, params], [api, urn, config_, baseConfig]) => {
+    console.log('RequestLogger begin')
     console.log(url.toString(), JSON.stringify(config), JSON.stringify([body, params]), JSON.stringify([api, urn, config_, baseConfig]))
+    console.log('RequestLogger end')
+}
+
+export const RequestDelay: (delay: number) => PipeRequest = (delay: number) => async () => {
+    await new Promise(resolve => setTimeout(resolve, delay))
 }

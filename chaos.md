@@ -122,6 +122,7 @@ FormDate(),JSON,
 
 
 // About axios
+axios is heavily inspired by the $http service provided in Angular. Ultimately axios is an effort to provide a standalone $http-like service for use outside of Angular.
 axios({}):big obj, config{method,url,data,header...}
 axios.request(config)
 axios.get(url[, config])

@@ -4,7 +4,7 @@
 
 ## iPipe.eject property
 
-eject a function
+eject function(s)
 
 <b>Signature:</b>
 

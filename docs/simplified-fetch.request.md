@@ -9,9 +9,9 @@ config of fetch
 <b>Signature:</b>
 
 ```typescript
-export declare type request = {
+export declare type request = URN | {
     urn: URN;
-    config?: BaseConfig;
+    config?: Omit<BaseConfig, 'newName'>;
 };
 ```
 <b>References:</b> [URN](./simplified-fetch.urn.md)<!-- -->, [BaseConfig](./simplified-fetch.baseconfig.md)
