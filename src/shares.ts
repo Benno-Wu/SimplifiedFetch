@@ -14,7 +14,7 @@ export const toString = Function.prototype.call.bind(Object.prototype.toString)
 // }
 
 export const objects = Object.fromEntries(
-    ['Object', 'Number', 'String', 'Array', 'URLSearchParam', 'FormData']
+    ['Object', 'Number', 'String', 'Array', 'URLSearchParams', 'FormData']
         .map(v => [v, `[object ${v}]`]))
 
 export const object2String = (type: string) => `[object ${type}]`

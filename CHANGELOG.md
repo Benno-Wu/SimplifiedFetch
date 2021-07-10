@@ -1,3 +1,7 @@
+### 0.4.1
+**bug fix**
+- body type URLSearchParams
+
 ### 0.4.0
 #### ⚠ _notice_: big change, read bofore update.
 - pipeRequest is async now
