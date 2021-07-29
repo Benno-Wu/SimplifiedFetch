@@ -9,5 +9,5 @@ Asynchronous executed after internal core operation with url &amp; config, just 
 <b>Signature:</b>
 
 ```typescript
-request: iPipe<PipeRequest>;
+request: iOrderablePipe<PipeRequest>;
 ```

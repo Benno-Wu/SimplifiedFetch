@@ -9,7 +9,7 @@ the access of configed fetch
 <b>Signature:</b>
 
 ```typescript
-export declare type apiF<Body, Param, Return> = (body?: bodyAsParams | Body, params?: any | Param, config?: Omit<BaseConfig, "enableAbort" | 'newName'>) => Promise<Return>;
+export declare type apiF<Body, Param, Return> = (body?: bodyAsParams | Body, params?: Param, config?: Omit<BaseConfig, "enableAbort" | 'newName'>) => Promise<Return>;
 ```
 <b>References:</b> [bodyAsParams](./simplified-fetch.bodyasparams.md)<!-- -->, [BaseConfig](./simplified-fetch.baseconfig.md)
 

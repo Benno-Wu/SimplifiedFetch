@@ -5,9 +5,9 @@ var pipes = (function (exports) {
         console.log(`try fetch ${url}, blocked by NoRepuest Pipe`);
         return 'No Request';
     };
-    const RequestLogger = (url, config, [body, params], [api, urn, config_, baseConfig]) => {
+    const RequestLogger = (url, config, [body, params, dynamicConfig], [api, urn, config_, baseConfig]) => {
         console.log('RequestLogger begin');
-        console.log(url.toString(), JSON.stringify(config), JSON.stringify([body, params]), JSON.stringify([api, urn, config_, baseConfig]));
+        console.log(url.toString(), JSON.stringify(config), JSON.stringify([body, params, dynamicConfig]), JSON.stringify([api, urn, config_, baseConfig]));
         console.log('RequestLogger end');
     };
     const RequestDelay = (delay) => async () => {

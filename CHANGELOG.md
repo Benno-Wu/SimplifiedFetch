@@ -1,3 +1,11 @@
+### 0.5.0
+#### ⚠ _notice_: big change, read bofore update.
+- use/eject pipes with order
+- params one more usage
+- dynamicConfig is accessible on pipeRequest
+- add ts example
+- better typed
+
 ### 0.4.1
 **bug fix**
 - body type URLSearchParams
@@ -34,7 +42,7 @@
 ### 0.0.9
 - fix export error & forget to generate the type
 
-knowns bugs
+known bugs
 - wrong polyfill export, it always runs even if you don't import it.
 
 ### 0.0.8
@@ -56,7 +64,7 @@ _notice:_ pipeline will be fixed soon and come with new design of control
 new ideas
 - design of pipe control
 
-knowns bugs
+known bugs
 * pipeline
 
 ### 0.0.3

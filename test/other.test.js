@@ -137,15 +137,17 @@ describe('Simplified Fetch Other Test', () => {
                     final.api = api
                     final.urn = urn + ''
                     final.configF = configF
-                    url.pathname = url.pathname.replace('undefined', '')
+                    url.pathname = url.pathname.replace('/undefined/test', '')
                     url.pathname += 'users'
                     config.method = 'GET'
                     Reflect.deleteProperty(config, 'body')
                 })
-                final.requestMapSize = Api.request.pipeMap.size
+                // final.requestMapSize = Api.request.pipeMap.size
+                final.requestMapSize = Object.keys(Api.request.pipeMap).length
                 const result = await Api.pipeUser({ test: 'test' }, 'test')
                 Api.request.eject(key)
-                final.size = Api.request.pipeMap.size
+                // final.size = Api.request.pipeMap.size
+                final.size = Api.request.pipeMap[0].length
                 final.resultLen = result.length
                 return final
             })
@@ -195,7 +197,7 @@ describe('Simplified Fetch Other Test', () => {
                     config.method = 'GET'
                     Reflect.deleteProperty(config, 'body')
                 })
-                final.reqL = Api.request.pipeMap.size
+                final.reqL = Api.request.pipeMap[0].length
                 const keys = Api.response.use(async (response, request, [resolve, reject]) => {
                     final.bodyUsed = response.bodyUsed
                     const res = await response.json()
@@ -207,12 +209,12 @@ describe('Simplified Fetch Other Test', () => {
                     console.log('Gotcha!')
                     final.gotcha = true
                 })
-                final.resL = Api.response.pipeMap.size
+                final.resL = Api.response.pipeMap[0].length
                 const result = await Api.pipeUser({ whatever: 'whatever' })
                 final.result = result
                 Api.request.eject(key)
                 Api.response.eject(keys)
-                final.resL2 = Api.response.pipeMap.size
+                final.resL2 = Api.response.pipeMap[0].length
                 return final
             })
             expect(_).toEqual({

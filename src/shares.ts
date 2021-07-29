@@ -1,4 +1,6 @@
+// todo type-challenge
 export const toString = Function.prototype.call.bind(Object.prototype.toString)
+export const hasOwnProperty = Function.prototype.call.bind(Object.prototype.hasOwnProperty)
 
 // export const objects: any = Proxy ? new Proxy({}, {
 //     get: function (obj, prop: string) {
@@ -13,11 +15,22 @@ export const toString = Function.prototype.call.bind(Object.prototype.toString)
 //     formData: '[object FormData]',
 // }
 
-export const objects = Object.fromEntries(
-    ['Object', 'Number', 'String', 'Array', 'URLSearchParams', 'FormData']
-        .map(v => [v, `[object ${v}]`]))
+// https://stackoverflow.com/questions/46176165/ways-to-get-string-literal-type-of-array-values-without-enum-overhead
+// type _types = 'Object' | 'Number' | 'String' | 'Array' | 'URLSearchParams' | 'FormData'
+// const tuple = <T extends Array<string>>(...args: T) => args
+// const types = tuple('Object', 'Number', 'String', 'Array', 'URLSearchParams', 'FormData')
+const typeTuple = ['Object', 'Number', 'String', 'Array', 'URLSearchParams', 'FormData'] as const
+type typeString = typeof typeTuple[number]
+// todo type-challenge
+type perfixObject<types extends string> = Record<types, `[object ${types}]`>
+// Typescript — How to Object.fromEntries tuples
+// https://dev.to/svehla/typescript-object-fromentries-389c
+// export const objects = Object.fromEntries(typeTuple.map<[typeString, `[object ${typeString}]`]>(v => [v, `[object ${v}]`]))
+export const objects = Object.fromEntries<`[object ${typeString}]`>(typeTuple.map(v => [v, `[object ${v}]`])) as perfixObject<typeString>
 
-export const object2String = (type: string) => `[object ${type}]`
+export const object2String = <str extends string>(type: str) => `[object ${type}]` as const
+
+// todo test on benchmark/jsperf ?
 
 // 性能测试一哈,func和proxy的Heap很高, obj最爽快
 // console.log('func test start')

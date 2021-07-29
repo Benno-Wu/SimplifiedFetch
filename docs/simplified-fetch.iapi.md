@@ -19,6 +19,6 @@ export interface iApi
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [aborts](./simplified-fetch.iapi.aborts.md) | [iAborts](./simplified-fetch.iaborts.md) | get AbortController &amp; AbortSignal via \[controller, signal\]= Api.aborts.someApi |
-|  [request](./simplified-fetch.iapi.request.md) | [iPipe](./simplified-fetch.ipipe.md)<!-- -->&lt;[PipeRequest](./simplified-fetch.piperequest.md)<!-- -->&gt; | Asynchronous executed after internal core operation with url &amp; config, just before fetch [PipeRequest](./simplified-fetch.piperequest.md) |
-|  [response](./simplified-fetch.iapi.response.md) | [iPipe](./simplified-fetch.ipipe.md)<!-- -->&lt;[PipeResponse](./simplified-fetch.piperesponse.md)<!-- -->&gt; | Asynchronous executed just after getting the response [PipeResponse](./simplified-fetch.piperesponse.md) |
+|  [request](./simplified-fetch.iapi.request.md) | [iOrderablePipe](./simplified-fetch.iorderablepipe.md)<!-- -->&lt;[PipeRequest](./simplified-fetch.piperequest.md)<!-- -->&gt; | Asynchronous executed after internal core operation with url &amp; config, just before fetch [PipeRequest](./simplified-fetch.piperequest.md) |
+|  [response](./simplified-fetch.iapi.response.md) | [iOrderablePipe](./simplified-fetch.iorderablepipe.md)<!-- -->&lt;[PipeResponse](./simplified-fetch.piperesponse.md)<!-- -->&gt; | Asynchronous executed just after getting the response [PipeResponse](./simplified-fetch.piperesponse.md) |
 

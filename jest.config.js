@@ -158,8 +158,8 @@ module.exports = {
 
   // The regexp pattern or array of patterns that Jest uses to detect test files
   testRegex: [
-    // "base\.test\.js",
-    // "other\.test\.js",
+    // "base",
+    // "other",
     // "beforeV0.5",
   ],
 

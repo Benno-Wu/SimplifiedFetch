@@ -1,6 +1,7 @@
 const puppeteer = require("puppeteer-core")
 const fs = require('fs')
-const script = fs.readFileSync('.\\test\\src\\index.iife.js').toString()
+const iife = fs.readFileSync('.\\test\\src\\index.iife.js').toString()
+const pipes = fs.readFileSync('.\\test\\pipes.js').toString()
 
 // let browser, page
 // how this works? unknown, but each jest test has own context, so there will be many browser instances
@@ -33,7 +34,8 @@ beforeAll(async () => {
     // page.on('response', _ => console.log('res: ', [_.headers(), _.json(), _.url()]))
     // page.on('requestfinished', async _ => { _ = _.response(); console.log('res: ', [_.headers(), await _.json(), _.url()]) })
 
-    await page.addScriptTag({ content: script })
+    await page.addScriptTag({ content: iife })
+    await page.addScriptTag({ content: pipes })
 })
 
 afterAll(async () => {

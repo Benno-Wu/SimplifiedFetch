@@ -5,9 +5,9 @@ export const NoRequest: PipeRequest = (url, config, [body, params], [api, urn, c
     return 'No Request'
 }
 
-export const RequestLogger: PipeRequest = (url, config, [body, params], [api, urn, config_, baseConfig]) => {
+export const RequestLogger: PipeRequest = (url, config, [body, params, dynamicConfig], [api, urn, config_, baseConfig]) => {
     console.log('RequestLogger begin')
-    console.log(url.toString(), JSON.stringify(config), JSON.stringify([body, params]), JSON.stringify([api, urn, config_, baseConfig]))
+    console.log(url.toString(), JSON.stringify(config), JSON.stringify([body, params, dynamicConfig]), JSON.stringify([api, urn, config_, baseConfig]))
     console.log('RequestLogger end')
 }
 

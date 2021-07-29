@@ -112,7 +112,7 @@ export type URN = string | URNParser
  * 尝试过使用unknown | Record<keyof any, unknown>
  * 但是apiF的设计是无所谓这里param
  * 所以在约束谁？约束在init/create时，实现APIConfig<apis>时
- * need more work?
+ * todo need more work?
  */
 /**
  * parser the urn with prarms
@@ -138,12 +138,12 @@ export interface iApi {
      * Asynchronous executed after internal core operation with url & config, just before fetch
      * {@link PipeRequest}
      */
-    request: iPipe<PipeRequest>
+    request: iOrderablePipe<PipeRequest>
     /**
      * Asynchronous executed just after getting the response
      * {@link PipeResponse}
      */
-    response: iPipe<PipeResponse>
+    response: iOrderablePipe<PipeResponse>
 }
 
 /**
@@ -155,9 +155,41 @@ export type iAborts = Record<string, [AbortController, AbortSignal]>
 // export type iAborts<apis> = { [api in keyof apis]: [AbortController, AbortSignal] }
 
 /**
- * manage the functions which pipe the request or response
+ * manage orderable functions which pipe the request or response,
+ * pipes with different order executed in ascending numeric index order,
+ * pipes with same order executed in chronological order, like queue, first in first executed.
+ * @remarks
+ * based on feature [Ordinary OwnPropertyKeys](https://262.ecma-international.org/6.0/#sec-ordinary-object-internal-methods-and-internal-slots-ownpropertykeys)
  * @typeParam T- function of {@link PipeRequest}/{@link PipeResponse}
  * @public
+ */
+export interface iOrderablePipe<T extends PipeUnion> {
+    /**
+     * local ordered Object
+     */
+    pipeMap: Record<number | string, Array<T | null>>
+    /**
+     * push orderable function(s)
+     * @param ...pipe - pipe[0] as order should be nonnegative integer, rest should be function(s) as pipe(s).
+     * if order is not specified, set order to 0, which means will be executed in the first place.
+     * @returns [order:number, pipes:T[]], used for eject.
+     */
+    use: (...pipe: [number | string | T, ...T[]]) => [number, T[]]
+    /**
+     * eject orderable function(s)
+     * @param pipe - pipe[0] as order should be nonnegative integer, rest should be function(s) as pipe(s).
+     * if order is not specified, set order to the value which means executed first or normally 0.
+     * 
+     * order used to locate the pipes.
+     * @returns has & eject success?
+     */
+    eject: (pipe: [number | string | T, T[]]) => boolean[]
+}
+
+/**
+ * manage the functions which pipe the request or response
+ * @typeParam T- function of {@link PipeRequest}/{@link PipeResponse}
+ * @deprecated
  */
 export interface iPipe<T> {
     /**
@@ -178,13 +210,13 @@ export interface iPipe<T> {
     eject: (key: string | string[]) => boolean | boolean[]
 }
 
-type PipeUnion = PipeRequest | PipeResponse
+export type PipeUnion = PipeRequest | PipeResponse
 
 /**
  * Asynchronous executed after internal core operation with url & config, just before fetch
  * @param url - {@link https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch | MDN}
  * @param config - Final Config {@link https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch | MDN}
- * @param param - [body, params], Api.someApi(body, params) {@link apiF}
+ * @param param - [body, params, dynamicConfig], Api.someApi(body, params, config) {@link apiF}
  * @param configs -[api, urn, config, baseConfig] {@link BaseConfig} {@link APIConfig}
  * @remarks
  * only the change to url & config will effect, others are just copy from your init/create config & call params.
@@ -193,7 +225,7 @@ type PipeUnion = PipeRequest | PipeResponse
  * @public
  */
 export type PipeRequest = (url: URL, config: BaseConfig,
-    param: [bodyAsParams | undefined, any | undefined],
+    param: [bodyAsParams | undefined, any | undefined, Omit<BaseConfig, 'enableAbort' | 'newName'>],
     configs: [string, URN, BaseConfig, BaseConfig]) => unknown
 
 /**
@@ -215,7 +247,8 @@ export type PipeResponse = (response: Response, request: Request,
  * {@link https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams | MDN}
  * @public
  */
-export type bodyAsParams = string | object | Array<unknown> | BodyInit
+export type bodyAsParams = string | Record<string, unknown> | Array<unknown> | BodyInit
+
 /**
  * the access of configed fetch
  * @typeParam Body - the type of param0 body
@@ -229,8 +262,8 @@ export type bodyAsParams = string | object | Array<unknown> | BodyInit
  * first thing i want to do, it's something like Function Overloads, Generics are optional,
  * so my search keywords: optional generics, find some issues: #10571, #26242...
  * Suddenly i realize, how to infer in this situation: apiF<Body>, apiF<Param>, usage apiF<any>, which is any?
- * So, optional Generics need full write with some skip, which also means no optional, just give it any.
+ * So, optional Generics need full write with some skip, which also means no optional, just give it a type.
  * Default generic type variables #2175 may help a little.
  * @public
  */
-export type apiF<Body, Param, Return> = (body?: bodyAsParams | Body, params?: any | Param, config?: Omit<BaseConfig, "enableAbort" | 'newName'>) => Promise<Return>
+export type apiF<Body, Param, Return> = (body?: bodyAsParams | Body, params?: Param, config?: Omit<BaseConfig, "enableAbort" | 'newName'>) => Promise<Return>

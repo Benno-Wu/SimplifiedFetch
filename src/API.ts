@@ -1,5 +1,5 @@
-import { objects, toString } from "./shares";
-import { APIConfig, BaseConfig, bodyAsParams, BodyMixin, iAborts, iApi, iPipe, PipeRequest, PipeResponse, request, URN, URNParser } from "./type&interface";
+import { hasOwnProperty, objects, toString } from "./shares";
+import type { APIConfig, BaseConfig, bodyAsParams, BodyMixin, iAborts, iApi, iOrderablePipe, iPipe, PipeRequest, PipeResponse, PipeUnion, request, URN, URNParser } from "./type&interface";
 
 /**
  * main entry to generate the SimplifiedFetch
@@ -34,8 +34,8 @@ export default class API {
      * @param baseConfig - {@link BaseConfig}
      * @param apis - {@link APIConfig}
      */
-    static init(baseConfig: BaseConfig, apis: APIConfig<Record<string, request>>) {
-        let _: any = (function () {
+    static init(baseConfig: BaseConfig, apis: APIConfig<Record<string, request>>): void {
+        const _: any = (function () {
             if (typeof globalThis === 'object' && globalThis) return globalThis
             if (typeof window === 'object' && window) return window
             if (typeof self === 'object' && self) return self
@@ -44,8 +44,7 @@ export default class API {
             throw new Error(`unable to get globalThis, try 'import 'simplified-fetch/polyfill/globalThis'' before init`)
         })()
 
-        _[baseConfig?.newName || 'Api']
-            = new Api(apis, mergeConfig(API.baseConfig, baseConfig))
+        _[baseConfig?.newName || 'Api'] = new Api(apis, mergeConfig(API.baseConfig, baseConfig))
     }
     /**
      * create and return the new Api
@@ -60,8 +59,6 @@ export default class API {
 
 /**
  * The unified API request object, also 'SimplifiedFetch'
- * @remarks
- * refactor maybe
  */
 class Api implements iApi {
     /**
@@ -71,11 +68,11 @@ class Api implements iApi {
     /**
      * {@link PipeRequest}
      */
-    request = new Pipe<PipeRequest>()
+    request = new OrderablePipe<PipeRequest>()
     /**
      * {@link PipeResponse}
      */
-    response = new Pipe<PipeResponse>()
+    response = new OrderablePipe<PipeResponse>()
     /**
      * constructor of Api, return SimplifiedFetch
      * @param apis - {@link APIConfig}
@@ -83,21 +80,14 @@ class Api implements iApi {
      */
     constructor(apis: APIConfig<Record<string, request>>, baseConfig: BaseConfig) {
         for (const [api, request] of Object.entries(apis)) {
-            let urn: URN, config: BaseConfig = {};
+            let urn: URN, config: Omit<BaseConfig, 'newName'> = {};
             if (typeof request === 'string' || typeof request === 'function') urn = request
             else { ({ urn, config = {} } = request) }
 
-            // pipe request
-            // issue: unable to be async?
-            // issue: how to control the core operation with appropriate fine granularity
-            // optional position
-            // for (const [key, func] of this.request.pipeMap) {
-            //     func()
-            // }
-
             const configMerged: BaseConfig = mergeConfig(baseConfig, config)
 
-            let controller: AbortController, signal: AbortSignal, abort = configMerged?.enableAbort
+            let controller: AbortController, signal: AbortSignal
+            const abort = configMerged?.enableAbort
             if (abort) {
                 controller = new AbortController()
                 signal = controller.signal
@@ -105,7 +95,7 @@ class Api implements iApi {
                 this.aborts[api] = [controller, signal]
             }
 
-            (<any>this)[api] = async (body?: bodyAsParams, params?: unknown, dynamicConfig: BaseConfig = {}) => {
+            (<any>this)[api] = async (body?: bodyAsParams, params?: unknown, dynamicConfig: Omit<BaseConfig, 'enableAbort' | 'newName'> = {}) => {
                 // controller of both pipelines
                 let isEnd: unknown = false
 
@@ -113,26 +103,26 @@ class Api implements iApi {
 
                 const urlMerged = mergeURL(urn, configFinal, params)
                 urlMerged.pathname += configFinal?.suffix ?? ''
-                const urlFinal = body ? getURL(urlMerged, configFinal, body) : urlMerged
+                const urlFinal = body != null ? getURL(urlMerged, configFinal, body) : urlMerged
 
                 // pipe request
                 // too many parameters, but good for bug fix when people use this
-                for (const [key, func] of this.request.pipeMap) {
-                    if (!isEnd && typeof func === 'function') {
-                        isEnd = await func(urlFinal, configFinal, [body, params], [api, urn, config, baseConfig])
-                    }
-                }
+                for (const pipes in this.request.pipeMap)
+                    if (hasOwnProperty(this.request.pipeMap, pipes))
+                        for (const pipe of this.request.pipeMap[pipes])
+                            if (!isEnd && typeof pipe === 'function')
+                                isEnd = await pipe(urlFinal, configFinal, [body, params, dynamicConfig], [api, urn, config, baseConfig])
 
                 return new Promise((resolve, reject) => {
 
-                    if (!!isEnd) { reject(isEnd); return }
+                    if (isEnd) { reject(isEnd); return }
                     const res = (_: unknown) => { isEnd = true; resolve(_) }
                     const rej = (_: unknown) => { isEnd = true; reject(_) }
 
                     if (typeof abort === 'number') {
                         (<any>signal)['timeout'] = abort
                         // setTimeout(controller.abort, abort)
-                        // http://cncc.bingj.com/cache.aspx?q=abortcontroller+TypeError%3a+Illegal+invocation&d=4529919372958838&mkt=zh-CN&setlang=zh-CN&w=_Kx5vzyg9zAL-DC-uiwBRYUEGu1ci6oI
+                        // https://dev.to/bil/using-abortcontroller-with-react-hooks-and-typescript-to-cancel-window-fetch-requests-1md4
                         // abortcontroller TypeError: Illegal invocation
                         setTimeout(() => controller.abort(), abort)
                     }
@@ -142,15 +132,13 @@ class Api implements iApi {
                         .then(async response => {
 
                             // pipe response
-                            for (const [key, func] of this.response.pipeMap) {
-                                if (typeof func === 'function')
-                                    await func(response.clone(), request, [res, rej])
-                                if (!!isEnd) return
-                            }
-                            // too many parameters
-                            // await [...this.response.pipeMap.values()].reduce(
-                            //     async (result, func, index, array) => await func([resolve, reject], response, request, [result, index, array])
-                            //     , undefined)
+                            for (const pipes in this.response.pipeMap)
+                                if (hasOwnProperty(this.response.pipeMap, pipes))
+                                    for (const pipe of this.response.pipeMap[pipes]) {
+                                        if (typeof pipe === 'function')
+                                            await pipe(response.clone(), request.clone(), [res, rej])
+                                        if (isEnd) return
+                                    }
 
                             processResponse([resolve, reject], response, configFinal?.bodyMixin, configFinal?.pureResponse)
                         })
@@ -169,14 +157,77 @@ class Api implements iApi {
 }
 
 /**
+ * manage orderable functions which pipe the request or response,
+ * based on feature [Ordinary OwnPropertyKeys](https://262.ecma-international.org/6.0/#sec-ordinary-object-internal-methods-and-internal-slots-ownpropertykeys)
+ * @remarks
+ * [array index | Integer indix](https://tc39.es/ecma262/multipage/ecmascript-data-types-and-values.html#array-index)
+ * 
+ * {@link iOrderablePipe}
+ */
+class OrderablePipe<T extends PipeUnion> implements iOrderablePipe<T> {
+    /**
+     * @remarks
+     * [Dr. Axel Rauschmayer | exploringjs.com/es6](https://exploringjs.com/es6/ch_oop-besides-classes.html#_traversal-order-of-properties)
+     * 
+     * [stackoverflow | Y2008](https://stackoverflow.com/questions/280713/elements-order-in-a-for-in-loop)
+     * 
+     * [stackoverflow | Y2012](https://stackoverflow.com/questions/30076219/does-es6-introduce-a-well-defined-order-of-enumeration-for-object-properties)
+     * 
+     * [ES2015](https://262.ecma-international.org/6.0/#sec-ordinary-object-internal-methods-and-internal-slots-ownpropertykeys)
+     * 
+     * [ES2022](https://tc39.es/ecma262/multipage/ordinary-and-exotic-objects-behaviours.html#sec-ordinaryownpropertykeys)
+     * 
+     * [10 methods of rounding in JS](https://juejin.cn/post/6901887182375092231)
+     * 
+     * [performance](https://zhuanlan.zhihu.com/p/28105425)
+     */
+    pipeMap: Record<number | string, T[]> = {}
+    // use = (num: number | string | T, ...pipe: T[]): [number, T[]] => {
+    //     // todo delete after 0.5
+    //     // if (typeof num === 'number') {
+    //     //     const _ = Math.abs(Math.trunc(num))
+    //     //     hasOwnProperty(this.pipeMap, _) ? this.pipeMap[_].push(...pipes) : this.pipeMap[_] = pipes
+    //     //     return pipes
+    //     // } else {
+    //     //     hasOwnProperty(this.pipeMap, 0) ? this.pipeMap[0].push(num, ...pipes) : this.pipeMap[0] = [num, ...pipes]
+    //     //     return [num, ...pipes]
+    //     // }
+    //     let order: number, pipes: T[]
+    //     // @ts-ignore
+    //     typeof num !== 'function' ? (order = Math.abs(Math.trunc(num)), pipes = pipe) : (order = 0, pipes = [num].concat(pipe))
+    //     hasOwnProperty(this.pipeMap, order) ? this.pipeMap[order].push(...pipes) : this.pipeMap[order] = pipes
+    //     return [order, pipes]
+    // }
+
+    // issue about Tuple, related #4988 #17765
+    // finally in [#9874](https://github.com/microsoft/TypeScript/issues/9874), label: Too Complex
+    use = (...pipe: [number | string | T, ...T[]]): [number, T[]] => {
+        let order: number, pipes: T[]
+        // @ts-ignore 1.Math.trunc(string) 2.tuple.slice
+        typeof pipe[0] !== 'function' ? (order = Math.abs(Math.trunc(pipe[0])), pipes = pipe.slice(1)) : (order = 0, pipes = pipe)
+        // !Array.from(pipes)! resolve bug in beforeV0.5->APIConfig type URN test->URN type string, which will eject with length:5
+        hasOwnProperty(this.pipeMap, order) ? this.pipeMap[order].push(...pipes) : this.pipeMap[order] = Array.from(pipes)
+        return [order, pipes]
+    }
+    eject = ([num, pipe]: [number | string | T, T[]]): boolean[] => {
+        let order: number | string, pipes: T[]
+        // @ts-ignore
+        typeof num !== 'function' ? (order = Math.abs(Math.trunc(num)), pipes = pipe) : (order = Object.keys(this.pipeMap)?.[0] ?? 0, pipes = [num].concat(pipe))
+        const result: boolean[] = Array(pipes.length).fill(false)
+        this.pipeMap[order] = this.pipeMap[order].filter((v) => {
+            const index = pipes.indexOf(v)
+            return index === -1 ? true : (result[index] = true, false)
+        })
+        return result
+    }
+}
+
+/**
  * use ordered Map to manage the pipe<function>
  * {@link iPipe}
+ * @deprecated
  */
 class Pipe<T> implements iPipe<T> {
-    // update ts
-    // use private?
-    // orderedMap 二维数组?
-    // use(number, ...func) typeof numebr == number? order
     pipeMap = new Map<string, T>()
     use = (..._: T[]): string | string[] => {
         const key: string[] = []
@@ -204,7 +255,7 @@ class Pipe<T> implements iPipe<T> {
  * @param bodyMixin - {@link BodyMixin}
  * @param pure - get from config, whether resolve with Response.clone()
  */
-function processResponse([resolve, reject]: Array<Function>, response: Response, bodyMixin: BodyMixin = 'json', pure: boolean = false) {
+function processResponse([resolve, reject]: [(value: unknown) => void, (reason?: any) => void], response: Response, bodyMixin: BodyMixin = 'json', pure = false) {
     const pureResponse: Response | undefined = pure ? response.clone() : undefined;
     response[bodyMixin]()
         .then((res: unknown) => resolve(pure ? [res, pureResponse] : res))
@@ -239,81 +290,67 @@ function mergeConfigs(...configs: BaseConfig[]) {
  * generate fetch url
  * @param urn - {@link URN}
  * @param config - {@link BaseConfig}
- * @param params - Api.someApi(body, params), use for step: urnParser
+ * @param params - Api.someApi(body, params, dynamicConfig), use for step: urnParser
  * @returns url wait to fetch
  */
 function mergeURL(urn: URN, config: BaseConfig, params?: unknown): URL {
-    // todo: params now is just for urn when it's function. if urn isn't function, then auto parse params to string +=url.search
-    // reason: body is just for body, if get wrong method, then parse. it is already done.
-    // Both do the same thing, so which one first?
-
-    // todo params is simple obj, parse into urlSearchParam, add to search
-
-    // https://developer.mozilla.org/en-US/docs/Web/API/URL/URL
-    return new URL(typeof urn === 'function' ? urn(params) : urn, config?.baseURL ?? '')
+    const base = config?.baseURL ?? undefined
+    return typeof urn === 'function' ? new URL(urn(params), base) : appendPathnameOrSearch(params, new URL(urn, base))
 }
 
 /**
- * transform user's body properly tn fetch's body
+ * transform body properly to fetch body
  * @param url - {@link https://developer.mozilla.org/en-US/docs/Web/API/URL}
  * @param config - {@link BaseConfig}
  * @param body - {@link bodyAsParams}
  * @returns final url and config for fetch
  */
 function getURL(url: URL, config: BaseConfig, body: bodyAsParams): URL {
-    const bodyType = toString(body)
-    // reasons: Failed to execute 'fetch' on 'Window': Request with ！GET/HEAD！ method cannot have body.
+    // reason: Failed to execute 'fetch' on 'Window': Request with ！GET/HEAD！ method cannot have body.
+    // https://fetch.spec.whatwg.org/#request-class constructor step-34
     if (['GET', 'HEAD'].includes(config.method!.toUpperCase())) {
-        // situation: 'xxx',xxx/','xxx/?','xxx/?a=1','xxx/?a=1&',
-        const search = url.search.includes('?')
-        // this won't be done automatically on Chromium
-        url.search += search && url.search.slice(-1)[0] !== '&' ? '&' : ''
-
-        switch (bodyType) {
-            case objects.Object:
-                // issue: bug when strange body comes
-                // @ts-ignore
-                url.search += new URLSearchParams(body).toString()
-                break;
-            case objects.FormData:
-                // https://developer.mozilla.org/en-US/docs/Web/API/FormData
-                /*
-                You can also pass it directly to the URLSearchParams constructor
-                if you want to generate query parameters in the way a <form> would do
-                if it were using simple GET submission.
-                 */
-                // @ts-ignore
-                // https://github.com/microsoft/TypeScript/issues/30584
-                url.search += new URLSearchParams(body).toString()
-                break;
-            case objects.URLSearchParams:
-                url.search += body.toString()
-                break
-            // this will be done automatically on Chromium
-            // explain: x.search, get:'', x.search+='a=1', a.search, get:'?a=1'
-            // todo: more compatibility Test?
-            // if (search) {
-            //     url.search = '?'.concat(url.search)
-            // }
-
-            case objects.Array:
-                url.pathname += `/${body.toString()}`
-                break;
-            case objects.String:
-                url.pathname += `/${body.toString()}`
-                break;
-            case objects.Number:
-                url.pathname += `/${body.toString()}`
-                break;
-        }
+        url = appendPathnameOrSearch(body, url)
     } else {
         //  obj2string,exclude
         //  ['[object Blob]','[object ArrayBuffer]','[object FormData]',
         //  '[object URLSearchParams]','[object ReadableStream]','[object String]']
-        if (bodyType === objects.Object || Array.isArray(body)) {
+        if (toString(body) === objects.Object || Array.isArray(body)) {
             body = JSON.stringify(body)
         }
         config.body = body as BodyInit
+    }
+    return url
+}
+
+/**
+ * append params | body to URL pathname | search
+ * @param end params or body
+ * @param url URL
+ * @returns URL
+ * @remarks
+ * type [Object, FormData, URLSearchParams] append to search
+ * type [Array, String, Number] append to pathname
+ */
+function appendPathnameOrSearch(end: any, url: URL): URL {
+    const endType = toString(end)
+    // https://developer.mozilla.org/en-US/docs/Web/API/FormData
+    /*
+    You can also pass it directly to the URLSearchParams constructor
+    if you want to generate query parameters in the way a <form> would do
+    if it were using simple GET submission.
+     */
+    // https://github.com/microsoft/TypeScript/issues/30584
+    if ([objects.Object, objects.FormData, objects.URLSearchParams].includes(endType)) {
+        // https://url.spec.whatwg.org/#dom-url-search
+        const search = url.search.includes('?')
+        // this won't be done automatically
+        url.search += search && url.search.slice(-1)[0] !== '&' ? '&' : ''
+        // @ts-ignor
+        url.search += new URLSearchParams(end).toString()
+    } else if ([objects.Array, objects.Number, objects.String].includes(endType)) {
+        const pathname = url.pathname.slice(-1)[0] === '/'
+        // @ts-ignor
+        url.pathname += (pathname ? '' : '/') + end.toString()
     }
     return url
 }

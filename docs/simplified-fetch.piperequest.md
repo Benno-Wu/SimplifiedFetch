@@ -9,7 +9,7 @@ Asynchronous executed after internal core operation with url &amp; config, just 
 <b>Signature:</b>
 
 ```typescript
-export declare type PipeRequest = (url: URL, config: BaseConfig, param: [bodyAsParams | undefined, any | undefined], configs: [string, URN, BaseConfig, BaseConfig]) => unknown;
+export declare type PipeRequest = (url: URL, config: BaseConfig, param: [bodyAsParams | undefined, any | undefined, Omit<BaseConfig, 'enableAbort' | 'newName'>], configs: [string, URN, BaseConfig, BaseConfig]) => unknown;
 ```
 <b>References:</b> [BaseConfig](./simplified-fetch.baseconfig.md)<!-- -->, [bodyAsParams](./simplified-fetch.bodyasparams.md)<!-- -->, [URN](./simplified-fetch.urn.md)
 

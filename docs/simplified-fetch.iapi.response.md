@@ -9,5 +9,5 @@ Asynchronous executed just after getting the response [PipeResponse](./simplifie
 <b>Signature:</b>
 
 ```typescript
-response: iPipe<PipeResponse>;
+response: iOrderablePipe<PipeResponse>;
 ```

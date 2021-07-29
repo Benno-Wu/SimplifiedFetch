@@ -24,6 +24,7 @@ export default [{
             presets: [['@babel/preset-env', {
                 useBuiltIns: 'usage', corejs: { version: '3.15' },
                 targets: pkg.browserslist,
+                debug: false,
             },]],
             plugins: [['@babel/plugin-transform-runtime', { useESModules: true }]]
         }),

@@ -4,6 +4,10 @@
 
 ## iPipe interface
 
+> Warning: This API is now obsolete.
+> 
+> 
+
 manage the functions which pipe the request or response
 
 <b>Signature:</b>
