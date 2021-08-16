@@ -2,6 +2,11 @@
 
 Encapsulate a unified API request object to simplify the use of [fetch | MDN](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) and enhance it!
 
+[![NPM version](https://img.shields.io/npm/v/simplified-fetch?style=flat-square)](https://npmjs.org/package/simplified-fetch)
+[![NPM downloads](https://img.shields.io/npm/dm/simplified-fetch?style=flat-square)](https://npmjs.org/package/simplified-fetch)
+
+___support borwser & node.js___
+
 > npm i simplified-fetch
 
 __If you like this repository, share it!__
@@ -46,17 +51,19 @@ const api = API.create({...}:BaseConfig, {...}:ApiConfig)
 
 if you are familiar with fetch, it's just used for normal step response.json() or others.
 
-### Examples
+### Example
 
 ```ts
-// have a quick look at *.test.js
-// ts examples
 import API from "simplified-fetch"
-import type { apiF, iApi, APIConfig } from "simplified-fetch"
+import type { apiF, iApi, iApi_beta, APIConfig } from "simplified-fetch"
 
 declare global {
-    var Api: iApi & Apis
+    // unable to hint when Api.aborts.someApiEnableAbort
+    // var Api: iApi & Apis
+    // able to hint when Api.aborts.someApiEnableAbort
+    var Api: iApi_beta<typeof configs> & Apis
 }
+
 // type your response
 type response<T> = {
     body: T,
@@ -70,11 +77,14 @@ interface Apis {
     // someApi2: apiF<any, any, response<{ api2: { api2: number } }>>,
 }
 
+// comment next line after config all Apis
 const configs: APIConfig<Apis> = {
+// necessary to enable hint when Api.aborts.someApiEnableAbort
+// const configs = {
     someApi0: '/someApi0',
     someApi1: { urn: '/someApi1', config: { method: 'GET' } },
     // someApi2: { urn: '/someApi2', config: { headers: { 'Content-Type': 'application/x-www-form-urlencoded' } } },
-}
+} as const
 
 API.init({
     baseURL: 'https://www.example.com',
@@ -202,12 +212,19 @@ other methods: Object and Array will be auto wrapped by JSON.stringfy()
 - ## more
 __read [docs](https://benno-wu.github.io/SimplifiedFetch/) or create an issue or a discussion.__
 
+## runtime NodeJS
+
+- ### FormData
+when using FormData, please require this [@web-std/form-data](https://github.com/web-std/io/tree/main/form-data) and set FormData global.
+Don't set this [form-data](https://github.com/form-data/form-data) global, and you can still use it local.
+
+_Reason_: When body or params type FormData, internal core operation with __url__ needs Web API compatible FormData.
+
 # Idea & Beta
 
-- runtime nodejs
 - use/eject pipe once?
 - formdata better support(application/x-www-form-urlencoded | multipart/form-data)
 - fake mock? PipeRequest with resolve
 
 ---
-Thanks to MDN, whatwg and Many blogers.
+Thanks to MDN, whatwg and Many blogers...

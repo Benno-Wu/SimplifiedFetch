@@ -1,5 +1,11 @@
 import { hasOwnProperty, objects, toString } from "./shares";
 import type { APIConfig, BaseConfig, bodyAsParams, BodyMixin, iAborts, iApi, iOrderablePipe, iPipe, PipeRequest, PipeResponse, PipeUnion, request, URN, URNParser } from "./type&interface";
+// tried and failed on dynamic import, hard2build
+import 'isomorphic-fetch';
+import "abort-controller/polyfill"
+// if (process?.version > 'v15') {
+//     // after NodeJS v15, native supported
+// }
 
 /**
  * main entry to generate the SimplifiedFetch
@@ -35,16 +41,7 @@ export default class API {
      * @param apis - {@link APIConfig}
      */
     static init(baseConfig: BaseConfig, apis: APIConfig<Record<string, request>>): void {
-        const _: any = (function () {
-            if (typeof globalThis === 'object' && globalThis) return globalThis
-            if (typeof window === 'object' && window) return window
-            if (typeof self === 'object' && self) return self
-            // for node
-            if (typeof global === 'object' && global) return global
-            throw new Error(`unable to get globalThis, try 'import 'simplified-fetch/polyfill/globalThis'' before init`)
-        })()
-
-        _[baseConfig?.newName || 'Api'] = new Api(apis, mergeConfig(API.baseConfig, baseConfig))
+        (<any>globalThis)[baseConfig?.newName || 'Api'] = new Api(apis, mergeConfig(API.baseConfig, baseConfig))
     }
     /**
      * create and return the new Api
@@ -107,11 +104,15 @@ class Api implements iApi {
 
                 // pipe request
                 // too many parameters, but good for bug fix when people use this
-                for (const pipes in this.request.pipeMap)
-                    if (hasOwnProperty(this.request.pipeMap, pipes))
-                        for (const pipe of this.request.pipeMap[pipes])
-                            if (!isEnd && typeof pipe === 'function')
-                                isEnd = await pipe(urlFinal, configFinal, [body, params, dynamicConfig], [api, urn, config, baseConfig])
+                // for (const pipes in this.request.pipeMap)
+                //     if (hasOwnProperty(this.request.pipeMap, pipes))
+                //         for (const pipe of this.request.pipeMap[pipes])
+                //             if (!isEnd && typeof pipe === 'function')
+                //                 isEnd = await pipe(urlFinal, configFinal, [body, params, dynamicConfig], [api, urn, config, baseConfig])
+                for (const pipes of this.request)
+                    for (const pipe of pipes)
+                        if (!isEnd && typeof pipe === 'function')
+                            isEnd = await pipe(urlFinal, configFinal, [body, params, dynamicConfig], [api, urn, config, baseConfig])
 
                 return new Promise((resolve, reject) => {
 
@@ -128,17 +129,23 @@ class Api implements iApi {
                     }
 
                     const request = new Request(urlFinal.toString(), configFinal)
-                    fetch(request)
+                    fetch(request.clone())
                         .then(async response => {
 
                             // pipe response
-                            for (const pipes in this.response.pipeMap)
-                                if (hasOwnProperty(this.response.pipeMap, pipes))
-                                    for (const pipe of this.response.pipeMap[pipes]) {
-                                        if (typeof pipe === 'function')
-                                            await pipe(response.clone(), request.clone(), [res, rej])
-                                        if (isEnd) return
-                                    }
+                            // for (const pipes in this.response.pipeMap)
+                            //     if (hasOwnProperty(this.response.pipeMap, pipes))
+                            //         for (const pipe of this.response.pipeMap[pipes]) {
+                            //             if (typeof pipe === 'function')
+                            //                 await pipe(response.clone(), request.clone(), [res, rej])
+                            //             if (isEnd) return
+                            //         }
+                            for (const pipes of this.response)
+                                for (const pipe of pipes) {
+                                    if (typeof pipe === 'function')
+                                        await pipe(response.clone(), request.clone(), [res, rej])
+                                    if (isEnd) return
+                                }
 
                             processResponse([resolve, reject], response, configFinal?.bodyMixin, configFinal?.pureResponse)
                         })
@@ -181,24 +188,7 @@ class OrderablePipe<T extends PipeUnion> implements iOrderablePipe<T> {
      * 
      * [performance](https://zhuanlan.zhihu.com/p/28105425)
      */
-    pipeMap: Record<number | string, T[]> = {}
-    // use = (num: number | string | T, ...pipe: T[]): [number, T[]] => {
-    //     // todo delete after 0.5
-    //     // if (typeof num === 'number') {
-    //     //     const _ = Math.abs(Math.trunc(num))
-    //     //     hasOwnProperty(this.pipeMap, _) ? this.pipeMap[_].push(...pipes) : this.pipeMap[_] = pipes
-    //     //     return pipes
-    //     // } else {
-    //     //     hasOwnProperty(this.pipeMap, 0) ? this.pipeMap[0].push(num, ...pipes) : this.pipeMap[0] = [num, ...pipes]
-    //     //     return [num, ...pipes]
-    //     // }
-    //     let order: number, pipes: T[]
-    //     // @ts-ignore
-    //     typeof num !== 'function' ? (order = Math.abs(Math.trunc(num)), pipes = pipe) : (order = 0, pipes = [num].concat(pipe))
-    //     hasOwnProperty(this.pipeMap, order) ? this.pipeMap[order].push(...pipes) : this.pipeMap[order] = pipes
-    //     return [order, pipes]
-    // }
-
+    #pipeMap: Record<number | string, T[]> = {}
     // issue about Tuple, related #4988 #17765
     // finally in [#9874](https://github.com/microsoft/TypeScript/issues/9874), label: Too Complex
     use = (...pipe: [number | string | T, ...T[]]): [number, T[]] => {
@@ -206,7 +196,7 @@ class OrderablePipe<T extends PipeUnion> implements iOrderablePipe<T> {
         // @ts-ignore 1.Math.trunc(string) 2.tuple.slice
         typeof pipe[0] !== 'function' ? (order = Math.abs(Math.trunc(pipe[0])), pipes = pipe.slice(1)) : (order = 0, pipes = pipe)
         // !Array.from(pipes)! resolve bug in beforeV0.5->APIConfig type URN test->URN type string, which will eject with length:5
-        hasOwnProperty(this.pipeMap, order) ? this.pipeMap[order].push(...pipes) : this.pipeMap[order] = Array.from(pipes)
+        hasOwnProperty(this.#pipeMap, order) ? this.#pipeMap[order].push(...pipes) : this.#pipeMap[order] = Array.from(pipes)
         return [order, pipes]
     }
     eject = ([num, pipe]: [number | string | T, T[]]): boolean[] => {
@@ -214,18 +204,26 @@ class OrderablePipe<T extends PipeUnion> implements iOrderablePipe<T> {
         // @ts-ignore
         typeof num !== 'function' ? (order = Math.abs(Math.trunc(num)), pipes = pipe) : (order = Object.keys(this.pipeMap)?.[0] ?? 0, pipes = [num].concat(pipe))
         const result: boolean[] = Array(pipes.length).fill(false)
-        this.pipeMap[order] = this.pipeMap[order].filter((v) => {
+        this.#pipeMap[order] = this.#pipeMap[order].filter((v) => {
             const index = pipes.indexOf(v)
             return index === -1 ? true : (result[index] = true, false)
         })
         return result
+    }
+    /**
+     * @internal
+     */
+    *[Symbol.iterator]() {
+        for (const key in this.#pipeMap) {
+            yield this.#pipeMap[key]
+        }
     }
 }
 
 /**
  * use ordered Map to manage the pipe<function>
  * {@link iPipe}
- * @deprecated
+ * @deprecated since 0.6, use OrderablePipe instead
  */
 class Pipe<T> implements iPipe<T> {
     pipeMap = new Map<string, T>()

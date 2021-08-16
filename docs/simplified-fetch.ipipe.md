@@ -6,6 +6,7 @@
 
 > Warning: This API is now obsolete.
 > 
+> since 0.6, use iOrderablePipe instead
 > 
 
 manage the functions which pipe the request or response

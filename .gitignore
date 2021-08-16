@@ -2,8 +2,6 @@
 
 package-lock.json
 
-bin
-polyfill
-!src/polyfill
+dist
 node_modules
 temp

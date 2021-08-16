@@ -3,6 +3,15 @@ import typescript from "@rollup/plugin-typescript"
 import del from "rollup-plugin-delete"
 import { terser } from "rollup-plugin-terser"
 import { getBabelOutputPlugin } from "@rollup/plugin-babel"
+import { nodeResolve } from "@rollup/plugin-node-resolve"
+import commonjs from "@rollup/plugin-commonjs"
+
+const terserConfig = {
+    keep_classnames: /AbortSignal/,
+    format: {
+        comments: false,
+    },
+}
 
 export default [{
     input: './src/index.ts',
@@ -12,9 +21,8 @@ export default [{
         name: pkg.name,
     },
     plugins: [
-        del({ targets: ['./bin'], }),
-        del({ targets: ['./bin/types/pipes.d.ts'], hook: 'closeBundle' }),
-        del({ targets: ['./bin/types/polyfill'], hook: 'closeBundle' }),
+        del({ targets: ['./dist'], }),
+        del({ targets: ['./dist/types/pipes.d.ts'], hook: 'closeBundle' }),
         typescript({
             tsconfig: './tsconfig.json',
             declaration: true,
@@ -28,12 +36,12 @@ export default [{
             },]],
             plugins: [['@babel/plugin-transform-runtime', { useESModules: true }]]
         }),
-        terser(),
+        terser(terserConfig),
     ],
-    external: [/@babel\/runtime/],
-}, {
+    external: [/@babel\/runtime/, /fetch/, /abort/],
+}, {// for umd publish
     input: './src/index.ts',
-    output: {// for umd publish
+    output: {
         file: pkg.main,
         // format: 'umd',
         name: pkg.name,
@@ -50,32 +58,14 @@ export default [{
             }]],
             plugins: [['@babel/plugin-transform-runtime', { useESModules: false }]]
         }),
-        terser(),
+        terser(terserConfig),
     ],
-    external: [/@babel\/runtime/],
-},
-{// for polyfill
-    input: {
-        globalThis: './src/polyfill/globalThis.ts',
-    },
-    output: {
-        dir: './polyfill',
-        entryFileNames: '[name]/index.js',
-        format: 'esm',
-    },
-    plugins: [
-        del({ targets: ['./polyfill'] }),
-        typescript({
-            tsconfig: false,
-            include: './src/polyfill/*',
-        }),
-        terser(),
-    ]
+    external: [/@babel\/runtime/, /fetch/, /abort/],
 }, {// for browser test
     input: './src/index.ts',
     output: {
-        file: pkg.main.replace('bin', 'test/src').replace('umd', 'iife'),
-        format: 'iife',
+        file: 'test/src/index.browser.js',
+        format: 'umd',
         // name for testEnv puppeteer
         name: 'test',
     },
@@ -84,13 +74,28 @@ export default [{
         typescript({
             tsconfig: './tsconfig.json',
         }),
-        terser(),
-    ]
+        terser(terserConfig),
+    ],
+    external: [/fetch/, /abort/],
+}, {// for node test
+    input: './src/index.ts',
+    output: {
+        file: 'test/src/index.node.js',
+        format: 'cjs',
+    },
+    plugins: [
+        typescript({
+            tsconfig: './tsconfig.json',
+        }),
+        nodeResolve(),
+        commonjs({ ignoreTryCatch: ['encoding'] }),
+        terser(terserConfig),
+    ],
 }, {// common pipes for test
     input: './src/pipes.ts',
     output: {
         file: 'test/pipes.js',
-        format: 'iife',
+        format: 'umd',
         name: 'pipes',
     },
     plugins: [

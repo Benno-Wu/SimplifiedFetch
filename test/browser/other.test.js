@@ -143,11 +143,11 @@ describe('Simplified Fetch Other Test', () => {
                     Reflect.deleteProperty(config, 'body')
                 })
                 // final.requestMapSize = Api.request.pipeMap.size
-                final.requestMapSize = Object.keys(Api.request.pipeMap).length
+                // final.requestMapSize = Object.keys(Api.request.pipeMap).length
                 const result = await Api.pipeUser({ test: 'test' }, 'test')
                 Api.request.eject(key)
                 // final.size = Api.request.pipeMap.size
-                final.size = Api.request.pipeMap[0].length
+                // final.size = Api.request.pipeMap[0].length
                 final.resultLen = result.length
                 return final
             })
@@ -157,8 +157,8 @@ describe('Simplified Fetch Other Test', () => {
                 api: 'pipeUser',
                 urn: 'undefined',
                 configF: {},
-                requestMapSize: 1,
-                size: 0,
+                // requestMapSize: 1,
+                // size: 0,
                 resultLen: 10,
             })
         })
@@ -197,11 +197,11 @@ describe('Simplified Fetch Other Test', () => {
                     config.method = 'GET'
                     Reflect.deleteProperty(config, 'body')
                 })
-                final.reqL = Api.request.pipeMap[0].length
+                // final.reqL = Api.request.pipeMap[0].length
                 const keys = Api.response.use(async (response, request, [resolve, reject]) => {
                     final.bodyUsed = response.bodyUsed
                     const res = await response.json()
-                    final.bodyUndefined = request.body === undefined
+                    final.nullishBody = request.body == undefined
                     final.ok = response.ok
                     final.used = response.bodyUsed
                     resolve(res.map(obj => ({ test: 'test' })))
@@ -209,17 +209,17 @@ describe('Simplified Fetch Other Test', () => {
                     console.log('Gotcha!')
                     final.gotcha = true
                 })
-                final.resL = Api.response.pipeMap[0].length
+                // final.resL = Api.response.pipeMap[0].length
                 const result = await Api.pipeUser({ whatever: 'whatever' })
                 final.result = result
                 Api.request.eject(key)
                 Api.response.eject(keys)
-                final.resL2 = Api.response.pipeMap[0].length
+                // final.resL2 = Api.response.pipeMap[0].length
                 return final
             })
             expect(_).toEqual({
-                reqL: 1, resL: 2, resL2: 0,
-                bodyUndefined: true,
+                // reqL: 1, resL: 2, resL2: 0,
+                nullishBody: true,
                 bodyUsed: false,
                 ok: true,
                 used: true,

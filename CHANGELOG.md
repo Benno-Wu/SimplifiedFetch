@@ -1,3 +1,10 @@
+### 0.6.0
+#### ⚠ _notice_: big change, read bofore update.
+- runtime nodejs
+- add polyfill: abort-controller, isomorphic-fetch
+- delete awesome globalThis polyfill by Mathias Bynens
+- better typed
+
 ### 0.5.0
 #### ⚠ _notice_: big change, read bofore update.
 - use/eject pipes with order
@@ -5,6 +12,7 @@
 - dynamicConfig is accessible on pipeRequest
 - add ts example
 - better typed
+- add eslint
 
 ### 0.4.1
 **bug fix**
@@ -17,6 +25,7 @@
 - fix wrong design of param on pipeline.use
 - publish iife
 - much better typed
+- add corejs@3
 - uglify->terser, causes bug on pipeline, when test with iife.
 
 ### 0.2.0

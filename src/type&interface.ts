@@ -108,17 +108,25 @@ export type request = URN | {
  */
 export type URN = string | URNParser
 /**
- * params之所以是any是因为URN，这个func要这个参数，再组合出最终url，一来二去就是any了
- * 尝试过使用unknown | Record<keyof any, unknown>
- * 但是apiF的设计是无所谓这里param
- * 所以在约束谁？约束在init/create时，实现APIConfig<apis>时
- * todo need more work?
- */
-/**
  * parser the urn with prarms
  * @public
  */
 export type URNParser = (params?: any) => string
+
+/**
+ * @internal
+ */
+export type PickEnableAbort<T> = ({ [k in keyof T]: k } & { [k in keyof T]: T[k] extends { config?: Pick<BaseConfig, 'enableAbort'> } ? k : never })[keyof T]
+
+/**
+ * {@link iApi}
+ * @beta
+ */
+export interface iApi_beta<T> {
+    aborts: iAborts_beta<PickEnableAbort<T>>
+    request: iOrderablePipe<PipeRequest>
+    response: iOrderablePipe<PipeResponse>
+}
 
 /**
  * get AbortController & AbortSignal via [controller, signal]= Api.aborts.someApi
@@ -147,12 +155,16 @@ export interface iApi {
 }
 
 /**
+ * {@link iApi}
+ * @beta
+ */
+export type iAborts_beta<T extends keyof any> = Record<T, [AbortController, AbortSignal]>
+
+/**
  * build-in, automatically generated AbortController & AbortSignal
  * @public
  */
 export type iAborts = Record<string, [AbortController, AbortSignal]>
-// todo how to type this: Api.aborts.[hint], consider usage
-// export type iAborts<apis> = { [api in keyof apis]: [AbortController, AbortSignal] }
 
 /**
  * manage orderable functions which pipe the request or response,
@@ -161,13 +173,13 @@ export type iAborts = Record<string, [AbortController, AbortSignal]>
  * @remarks
  * based on feature [Ordinary OwnPropertyKeys](https://262.ecma-international.org/6.0/#sec-ordinary-object-internal-methods-and-internal-slots-ownpropertykeys)
  * @typeParam T- function of {@link PipeRequest}/{@link PipeResponse}
- * @public
+ * @internal
  */
 export interface iOrderablePipe<T extends PipeUnion> {
     /**
-     * local ordered Object
+     * local private ordered Object
      */
-    pipeMap: Record<number | string, Array<T | null>>
+    // pipeMap: Record<number | string, Array<T | null>>
     /**
      * push orderable function(s)
      * @param ...pipe - pipe[0] as order should be nonnegative integer, rest should be function(s) as pipe(s).
@@ -189,7 +201,8 @@ export interface iOrderablePipe<T extends PipeUnion> {
 /**
  * manage the functions which pipe the request or response
  * @typeParam T- function of {@link PipeRequest}/{@link PipeResponse}
- * @deprecated
+ * @public
+ * @deprecated since 0.6, use iOrderablePipe instead
  */
 export interface iPipe<T> {
     /**
@@ -210,6 +223,9 @@ export interface iPipe<T> {
     eject: (key: string | string[]) => boolean | boolean[]
 }
 
+/**
+ * @internal
+ */
 export type PipeUnion = PipeRequest | PipeResponse
 
 /**
@@ -258,10 +274,10 @@ export type bodyAsParams = string | Record<string, unknown> | Array<unknown> | B
  * @param params - use for url building
  * @returns Promise\<returns\>
  * @privateRemarks
- * wanted: export type apiF<Body, Return>  & type apiF<Param, Return> and more
+ * wanted: export type apiF\<Body, Return\>  & type apiF\<Param, Return\> and more
  * first thing i want to do, it's something like Function Overloads, Generics are optional,
  * so my search keywords: optional generics, find some issues: #10571, #26242...
- * Suddenly i realize, how to infer in this situation: apiF<Body>, apiF<Param>, usage apiF<any>, which is any?
+ * Suddenly i realize, how to infer in this situation: apiF\<Body\>, apiF\<Param\>, usage apiF\<any\>, which is any?
  * So, optional Generics need full write with some skip, which also means no optional, just give it a type.
  * Default generic type variables #2175 may help a little.
  * @public

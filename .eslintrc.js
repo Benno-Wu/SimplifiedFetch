@@ -6,11 +6,12 @@ module.exports = {
     es2020: true,
   },
   globals: {
-    browser: true,
-    page: true,
-    Api: true,
-    pipes: true,
-    mockApi: true,
+    browser: 'readonly',
+    page: 'readonly',
+    Api: 'readonly',
+    pipes: 'readonly',
+    mockApi: 'readonly',
+    SimplifiedFetch: 'readonly',
   },
   parser: '@typescript-eslint/parser',
   plugins: [
@@ -26,10 +27,11 @@ module.exports = {
   },
   overrides: [
     {
-      files: ['test/*.js',],
+      files: ['test/**/*.js',],
       rules: {
         '@typescript-eslint/no-var-requires': 'off',
         '@typescript-eslint/no-unused-vars': 'off',
+        // shouldn't enable when test without NoRequest
         'no-empty': ['error', { "allowEmptyCatch": true }],
       }
     },

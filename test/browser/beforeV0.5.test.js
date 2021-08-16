@@ -4,7 +4,13 @@ describe('Before version 0.5', () => {
             globalThis.mockApi = test.default.create({
                 baseURL: 'http://jsonplaceholder.typicode.com/'
             }, {
-                fetch1User: 'users/1'
+                fetch1User: 'users/1',
+                postUser: {
+                    urn: '/users',
+                    config: {
+                        method: 'POST'
+                    }
+                }
             })
             return test.default.init({
                 baseURL: 'https://www.example.com'
@@ -340,8 +346,8 @@ describe('Before version 0.5', () => {
             test('use & eject', async () => {
                 const _ = await page.evaluate(async () => {
                     const final = []
-                    const NoRequest = Api.request.use(10, (...args) => { final.push(10); return pipes.NoRequest(...args) })
-                    const order1 = Api.request.use(1, () => { final.push(1) })
+                    const NoRequest = Api.request.use(0b111, (...args) => { final.push(0b111); return pipes.NoRequest(...args) })
+                    const order1 = Api.request.use(0b1, () => { final.push(1) })
                     const order0 = Api.request.use(() => { final.push(0) })
                     try {
                         await Api.urnStringTest()
@@ -354,14 +360,14 @@ describe('Before version 0.5', () => {
                     Api.request.eject(NoRequest)
                     return final
                 })
-                expect(_).toEqual([0, 1, 10, 'No Request', 0, 10, 'No Request'])
+                expect(_).toEqual([0, 0b1, 0b111, 'No Request', 0, 0b111, 'No Request'])
             })
         })
         describe('PipeResponse', () => {
             test('use & eject', async () => {
                 const _ = await page.evaluate(async () => {
                     const final = []
-                    const ParseJson = mockApi.response.use(10, async (response, req, [res, rej]) => {
+                    const ParseJson = mockApi.response.use(0b11, async (response, req, [res, rej]) => {
                         const json = await response.json()
                         final.push(json.id)
                         res(json)
@@ -370,33 +376,42 @@ describe('Before version 0.5', () => {
                     const order0 = mockApi.response.use(() => { final.push(0) })
                     try {
                         await mockApi.fetch1User()
-                    } catch (e) { }
+                    } catch (e) { final.push(e.name, e.message) }
                     mockApi.response.eject(order0)
                     try {
                         await mockApi.fetch1User()
-                    } catch (e) { }
+                    } catch (e) { final.push(e.name, e.message) }
                     mockApi.response.eject(order00)
                     mockApi.response.eject(ParseJson)
                     return final
                 })
                 expect(_).toEqual(['00', 0, 1, '00', 1])
             })
-            test('Should each PipeResponse gets unique Response and Resquest?', async () => {
-                const _ = await page.evaluate(async () => {
-                    const final = []
-                    const use = mockApi.response.use((res, req) => { res.json(); req.json() })
-                    const used = mockApi.response.use((res, req) => {
-                        final.push(res.bodyUsed || req.bodyUsed ? 'NO' : 'YES')
-                    })
-                    try {
-                        await mockApi.fetch1User()
-                    } catch (e) { }
-                    mockApi.response.eject(use)
-                    mockApi.response.eject(used)
-                    return final
+        })
+        test('Should each PipeResponse gets unique Response and Resquest?', async () => {
+            const user = {
+                name: 'test',
+                phone: 'test',
+                address: {
+                    street: 'xxx',
+                    suite: 'xxx',
+                    city: 'xxx',
+                }
+            }
+            const _ = await page.evaluate(async (user) => {
+                const final = []
+                const use = mockApi.response.use((res, req) => { res.json(); req.json() })
+                const used = mockApi.response.use((res, req) => {
+                    final.push(res.bodyUsed || req.bodyUsed ? 'NO' : 'YES')
                 })
-                expect(_).toEqual(['YES'])
-            })
+                try {
+                    await mockApi.postUser(user)
+                } catch (e) { final.push(e.name, e.message) }
+                mockApi.response.eject(use)
+                mockApi.response.eject(used)
+                return final
+            }, (user))
+            expect(_).toEqual(['YES'])
         })
     })
 })
