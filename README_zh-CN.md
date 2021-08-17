@@ -1,11 +1,11 @@
 # Simplified Fetch
 
-Encapsulate a unified API request object to simplify the use of [fetch | MDN](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API) and enhance it!
+通过封装一个统一的API请求对象，简化[fetch | MDN](https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API)的使用，并增强它！
 
 [![NPM version](https://img.shields.io/npm/v/simplified-fetch?style=flat-square)](https://npmjs.org/package/simplified-fetch)
 [![NPM downloads](https://img.shields.io/npm/dm/simplified-fetch?style=flat-square)](https://npmjs.org/package/simplified-fetch)
 
-___support borwser & node.js___
+___支持 浏览器 和 node.js___
 
 > npm i simplified-fetch
 
@@ -49,7 +49,7 @@ const api = API.create({...}:BaseConfig, {...}:ApiConfig)
 
 >### what is BodyMixin? [body-mixin | whatwg](https://fetch.spec.whatwg.org/#body-mixin)
 
-if you are familiar with fetch, it's just used for normal step response.json() or others.
+如果你熟悉原生的fetch，这一配置只是用于最终读取response流，像response.json()
 
 ### Example
 
@@ -110,9 +110,9 @@ const example = async () => {
 ## Config & Ability
 
 - ### default config & BaseConfig extends [RequestInit | whatwg](https://fetch.spec.whatwg.org/#requestinit)
-BaseConfig is just an extension of second param of fetch(resource [, init]) [fetch | MDN](https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch)
+BaseConfig是原生fetch(resource [, init]) 第二个参数的扩展[fetch | MDN](https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch)
 
-configs are listed in Usage.
+配置项都列在Usage中，下方是默认配置。
 ```ts
 {
   method: 'GET',
@@ -126,12 +126,12 @@ configs are listed in Usage.
 ```
 
 - ### urnParser & params
-urnParser is based on Template strings or [Template literals | MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals)
-#### usage : _executed before body formatter_
+urnParser基于模板字符串中的标签模板 Template strings or [Template literals | MDN](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals)
+#### usage : _在格式化body前执行_
 
-if typeof urn is function, then invike it with params, and build url with returned string.
+如果urn的类型是function，调用时传入params，返回值string用于构造url
 
-if typeof urn isn't function, then try to transform params and append to the search of URL (for type Object, FormData, URLSearchParams), or append to the pathname of URL (for type Array, String, Number).
+如果urn的类型不是function，尝试转化params并添加至URL的search部分(for type Object, FormData, URLSearchParams)，或者添加至URL的pathname部分(for type Array, String, Number).
 
 ```ts
 // init
@@ -142,9 +142,7 @@ someApi:{
 Api.someApi(body, ['user',[1,2,3]], config)
 // getUrl: /xxx/user/1,2,3
 ```
->in a way, you can do anything dynamicly on url, just set the placeholder index on, pass an Array, even an Object (index need to be string like: ${'key'} ).
-
-ps: if you get better idea or create some beautiful way to format the url, please PR!
+>urnParser中的各个占位符可以是任意的字符串，只要params可以通过[计算属性]访问即可，如果是Object类型，占位符需要长这样${'key'}。
 
 - ### abort & timeout
 [AbortController | MDN](https://developer.mozilla.org/en-US/docs/Web/API/AbortController)
@@ -152,35 +150,35 @@ ps: if you get better idea or create some beautiful way to format the url, pleas
 ```ts
 const [constroller, signal] = Api.aborts.someApi
 ```
->when you use as timeout, the number is accessible on signal.timeout and (error: AbortError).timeout
+>当配置为数字时，代表超时毫秒数，数值可得于signal.timeout and (error: AbortError).timeout
 
 - ## pipeline & control
 * #### pipeline (Api.request / Api.response)
-  * manage orderable functions which pipes before request or after response.
-  * pipes with different order executed in __ascending numeric index order__
-  * pipes with same order executed in __chronological order__, like queue, first in first executed.
-  * based on feature [Ordinary OwnPropertyKeys](https://262.ecma-international.org/6.0/#sec-ordinary-object-internal-methods-and-internal-slots-ownpropertykeys)
+  * 管理多个有序的pipes函数，在请求前或者响应后遍历执行它们。
+  * 不同order下的pipes基于 __递增的非负整数顺序__ 执行。
+  * 同一order下的pipes基于 __添加时间先后顺序__ 执行，就像队列，先进先执行。
+  * 实现基于特性[Ordinary OwnPropertyKeys](https://262.ecma-international.org/6.0/#sec-ordinary-object-internal-methods-and-internal-slots-ownpropertykeys)
 
 
 * #### use/eject with order
-  * use: @param ...pipe - pipe[0] as order should be nonnegative integer, rest should be function(s) as pipe(s). if order is not specified, set order to 0, which means will be executed in the first place.
-  * eject: @param pipe - pipe[0] as order should be nonnegative integer, rest should be function(s) as pipe(s). if order is not specified, set order to the value which means executed first or normally 0.
-  * order range: +0 ≤ i < 2^32 - 1
+  * use: @param ...pipe - pipe[0]即第一个参数应该为一个非负整数，其余为将遍历执行的pipes函数。如果第一个参数即order未指定，默认为0，代表将最先执行。
+  * eject: @param pipe - 唯一的数组参数的第一位pipe[0]应该是代表order的非负整数，第二位即用于匹配删除的pipes数组。如果order未指定，将取最先执行的order值，通常来说是0。
+  * order大小范围: +0 ≤ i < 2^32 - 1
 
 * #### PipeRequest
-__Asynchronous executed just before fetch and after internal core operation with url & config__
+__在发送请求之前，在内核处理url和config之后异步执行__
 >function: (url: URL, config: BaseConfig, [body, params, dynamicConfig], [someApi, urn, config, baseConfig]) => unknown
->>__only the change to url & config will effect,__ others are just from your init/create config & call params
+>>__只有针对url和config的修改才会生效，__ 其他只是复制于创建配置和调用配置时的值或引用
 
->Not recommended:
->Change anything in params[2 | 3] will possibly causes bugs
+>提醒:
+>不要修改第二、三个数组参数内的参数
 
 * #### PipeResponse
-__Asynchronous executed just after get Response__
+__获取Response后异步执行__
 >function: (response: Response, request: Request, [resolve, reject]) => Promise<unknown\>
 >>__invoke resolve | reject to end pipeline__
 
->Response and Request are both unique for each PipeResponse
+>Response和Request都是clone后传入每个PipeResponse
 
 ```ts
 const [order, pipes: PipeRequest[]] = Api.request.use(order: number | PipeRequest, ...functions: PipeRequest[])
@@ -195,30 +193,29 @@ const bools = Api.response.eject([order, pipes])
 
 - ### `control`
 ___PipeRequest___
-function return true or any message, someApi will immediate reject with that, don't forget to catch it.
+返回true或者任意的message(string)，someApi会立即reject，别忘了catch。
 
 ___PipeResponse___
-invoke resolve | reject to end pipeline
+调用 resolve | reject 结束pipeline
 
 - ### body
 __Failed to execute 'fetch' on 'Window': Request with ！GET/HEAD！ method cannot have body.__
 
 [fetch.spec.whatwg.org](https://fetch.spec.whatwg.org/#request-class) constructor step-34
 
-so body will be auto transformed by internal function to string, append to the search of URL (for type Object, FormData, URLSearchParams), or append to the pathname of URL (for type Array, String, Number).
+在上述情况下body会被自动转化为string，添加在URL的search部分(for type Object, FormData, URLSearchParams)，或者pathname部分(for type Array, String, Number).
 
-other methods: Object and Array will be auto wrapped by JSON.stringfy()
+其他method：Object和Array类型会自动包裹JSON.stringfy()
 
 - ## more
-__read [docs](https://benno-wu.github.io/SimplifiedFetch/) or create an issue or a discussion.__
+__读[docs](https://benno-wu.github.io/SimplifiedFetch/)或者开个issue或者discussion.__
 
 ## runtime NodeJS
 
 - ### FormData
-when using FormData, please require this [@web-std/form-data](https://github.com/web-std/io/tree/main/form-data) and set FormData global.
-Don't set this [form-data](https://github.com/form-data/form-data) global, and you can still use it local.
+当使用FormData时，请使用这个包[@web-std/form-data](https://github.com/web-std/io/tree/main/form-data)，并设置FormData在global上。不要将此包[form-data](https://github.com/form-data/form-data)设置在global上，但你任然可以局部使用它。
 
-_Reason_: When body or params type FormData, internal core operation with __url__ needs Web API compatible FormData.
+_理由_: 当body或者params是FormData类型时，内核操作生成 __url__ 的操作需要兼容Web API的FormData。
 
 # Idea & Beta
 
