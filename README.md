@@ -23,8 +23,7 @@ API.init({
     method?: Methods, // default:'GET', 'POST', 'PUT'...
     bodyMixin?: BodyMixin, // default:'json', 'text', 'blob', 'formData', 'arrayBuffer'
     enableAbort?: boolean | number, // abort & timeout(ms)
-    pureResponse?: boolean, // default:false, whether resolved with Response.clone()
-    // format: [response, pureResponse] or response
+    pureResponse?: boolean, // default:false, whether resolved with Response.clone(), format: [response, pureResponse] or response
     suffix?: string, // like .do .json
     custom?: any, // anything you want to put inside and use it in pipeline
 },{
