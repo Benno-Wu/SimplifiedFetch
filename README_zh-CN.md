@@ -130,7 +130,7 @@ urnParser基于模板字符串中的标签模板 Template strings or [Template l
 
 如果urn的类型是function，调用时传入params，返回值string用于构造url
 
-如果urn的类型不是function，尝试转化params并添加至URL的search部分(for type Object, FormData, URLSearchParams)，或者添加至URL的pathname部分(for type Array, String, Number).
+如果urn的类型不是function，尝试对部分类型用[URLSearchParams](https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams/toString)转化params并添加至URL的search部分(for type Object, FormData, URLSearchParams)，或者添加至URL的pathname部分(for type Array, String, Number).
 
 ```ts
 // init
@@ -202,7 +202,7 @@ __Failed to execute 'fetch' on 'Window': Request with ！GET/HEAD！ method cann
 
 [fetch.spec.whatwg.org](https://fetch.spec.whatwg.org/#request-class) constructor step-34
 
-在上述情况下body会被自动转化为string，添加在URL的search部分(for type Object, FormData, URLSearchParams)，或者pathname部分(for type Array, String, Number).
+在上述情况下body会尝试对部分类型使用[URLSearchParams](https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams/toString)转化为string，添加在URL的search部分(for type Object, FormData, URLSearchParams)，或者pathname部分(for type Array, String, Number).
 
 其他method：Object和Array类型会自动包裹JSON.stringfy()
 

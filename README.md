@@ -130,7 +130,7 @@ urnParser is based on Template strings or [Template literals | MDN](https://deve
 
 if typeof urn is function, then invike it with params, and build url with returned string.
 
-if typeof urn isn't function, then try to transform params and append to the search of URL (for type Object, FormData, URLSearchParams), or append to the pathname of URL (for type Array, String, Number).
+if typeof urn isn't function, then try to transform params by [URLSearchParams](https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams/toString) and append to the search of URL (for type Object, FormData, URLSearchParams), or append to the pathname of URL (for type Array, String, Number).
 
 ```ts
 // init
@@ -204,7 +204,7 @@ __Failed to execute 'fetch' on 'Window': Request with ！GET/HEAD！ method cann
 
 [fetch.spec.whatwg.org](https://fetch.spec.whatwg.org/#request-class) constructor step-34
 
-so body will be auto transformed by internal function to string, append to the search of URL (for type Object, FormData, URLSearchParams), or append to the pathname of URL (for type Array, String, Number).
+so body will be auto transformed by [URLSearchParams](https://developer.mozilla.org/en-US/docs/Web/API/URLSearchParams/toString) to string, append to the search of URL (for type Object, FormData, URLSearchParams), or append to the pathname of URL (for type Array, String, Number).
 
 other methods: Object and Array will be auto wrapped by JSON.stringfy()
 
