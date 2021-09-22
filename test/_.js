@@ -19,7 +19,7 @@ const escapePage = {
         }
         path.traverse({
             Identifier(path) {
-                types.isMemberExpression(path.parent)
+                types.isMemberExpression(path.parent) && path.parent.object === path.node
                     && path.node.name == 'test' ? path.node.name = 'SimplifiedFetch' : void 0;
             }
         })

@@ -1,5 +1,5 @@
 import { hasOwnProperty, objects, toString } from "./shares";
-import type { APIConfig, BaseConfig, bodyAsParams, BodyMixin, iAborts, iApi, iOrderablePipe, iPipe, PipeRequest, PipeResponse, PipeUnion, request, URN, URNParser } from "./type&interface";
+import type { APIConfig, BaseConfig, bodyAsParams, BodyMixin, iAborts, iApi, iDynamicConfig, iOrderablePipe, iPipe, PipeRequest, PipeResponse, PipeUnion, request, URN, URNParser } from "./type&interface";
 // tried and failed on dynamic import, hard2build
 import 'isomorphic-fetch';
 import "abort-controller/polyfill"
@@ -41,7 +41,7 @@ export default class API {
      * @param apis - {@link APIConfig}
      */
     static init(baseConfig: BaseConfig, apis: APIConfig<Record<string, request>>): void {
-        (<any>globalThis)[baseConfig?.newName || 'Api'] = new Api(apis, mergeConfig(API.baseConfig, baseConfig))
+        (<any>globalThis)[baseConfig?.newName || 'Api'] = new Api(mergeConfig(API.baseConfig, baseConfig), apis)
     }
     /**
      * create and return the new Api
@@ -50,7 +50,7 @@ export default class API {
      * @returns SimplifiedFetch
      */
     static create(baseConfig: BaseConfig, apis: APIConfig<Record<string, request>>): iApi {
-        return new Api(apis, mergeConfig(API.baseConfig, baseConfig))
+        return new Api(mergeConfig(API.baseConfig, baseConfig), apis)
     }
 }
 
@@ -75,12 +75,15 @@ class Api implements iApi {
      * @param apis - {@link APIConfig}
      * @param baseConfig - {@link BaseConfig}
      */
-    constructor(apis: APIConfig<Record<string, request>>, baseConfig: BaseConfig) {
+    constructor(baseConfig: BaseConfig, apis: APIConfig<Record<string, request>>) {
         for (const [api, request] of Object.entries(apis)) {
             let urn: URN, config: Omit<BaseConfig, 'newName'> = {};
             if (typeof request === 'string' || typeof request === 'function') urn = request
             else { ({ urn, config = {} } = request) }
 
+            if (baseConfig.methodInName) {
+                baseConfig.method = baseConfig.methodInName(api)
+            }
             const configMerged: BaseConfig = mergeConfig(baseConfig, config)
 
             let controller: AbortController, signal: AbortSignal
@@ -92,7 +95,7 @@ class Api implements iApi {
                 this.aborts[api] = [controller, signal]
             }
 
-            (<any>this)[api] = async (body?: bodyAsParams, params?: unknown, dynamicConfig: Omit<BaseConfig, 'enableAbort' | 'newName'> = {}) => {
+            (<any>this)[api] = async (body?: bodyAsParams, params?: unknown, dynamicConfig: iDynamicConfig = {}) => {
                 // controller of both pipelines
                 let isEnd: unknown = false
 

@@ -206,6 +206,11 @@ __Failed to execute 'fetch' on 'Window': Request with ！GET/HEAD！ method cann
 
 其他method：Object和Array类型会自动包裹JSON.stringfy()
 
+- #### methodInName
+从api的名称或者APIConfig的key中得到method，你可以试试[这个](https://github.com/Benno-Wu/SimplifiedFetch/blob/alpha/test/browser/beforeV0.10.test.js#L6)
+
+它只在init或者create的BaseConfig中生效，并且会被在APIConfig或者dynamicConfig中显式配置的值所替换。
+
 - ## more
 __读[docs](https://benno-wu.github.io/SimplifiedFetch/)或者开个issue或者discussion.__
 
@@ -221,6 +226,8 @@ _理由_: 当body或者params是FormData类型时，内核操作生成 __url__ �
 - use/eject pipe once?
 - formdata better support(application/x-www-form-urlencoded | multipart/form-data)
 - fake mock? PipeRequest with resolve
+- urlFormatter?: (body|params, url) => URL
+- OpenAPI
 
 ---
 Thanks to MDN, whatwg and Many blogers...

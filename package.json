@@ -1,6 +1,6 @@
 {
   "name": "simplified-fetch",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "Encapsulate a unified API request object to simplify the use of fetch and enhance it!",
   "main": "dist/index.umd.js",
   "module": "dist/index.esm.js",

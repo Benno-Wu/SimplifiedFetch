@@ -26,10 +26,11 @@ API.init({
     pureResponse?: boolean, // default:false, whether resolved with Response.clone(), format: [response, pureResponse] or response
     suffix?: string, // like .do .json
     custom?: any, // anything you want to put inside and use it in pipeline
+    methodInName?:(name: string)=>Methods, // get method from apis' name
 },{
     someApi:{
         urn: string | (params?: any) => string, // build in function: urnParser
-        config?: BaseConfig, // same as the above first param
+        config?: BaseConfig, // almost the same as the above first param
     },
     someApi2:{...},
     someApi3:'/xxx', // string as urn is supported
@@ -208,6 +209,11 @@ so body will be auto transformed by [URLSearchParams](https://developer.mozilla.
 
 other methods: Object and Array will be auto wrapped by JSON.stringfy()
 
+- #### methodInName
+get method from apis' name or APIConfig's key, you can use something like [this](https://github.com/Benno-Wu/SimplifiedFetch/blob/alpha/test/browser/beforeV0.10.test.js#L6)
+
+this only works in the BaseConfig when you init or create, and will be replaced by your explicit method value in APIConfig or dynamicConfig.
+
 - ## more
 __read [docs](https://benno-wu.github.io/SimplifiedFetch/) or create an issue or a discussion.__
 
@@ -224,6 +230,8 @@ _Reason_: When body or params type FormData, internal core operation with __url_
 - use/eject pipe once?
 - formdata better support(application/x-www-form-urlencoded | multipart/form-data)
 - fake mock? PipeRequest with resolve
+- urlFormatter?: (body|params, url) => URL
+- OpenAPI
 
 ---
 Thanks to MDN, whatwg and Many blogers...

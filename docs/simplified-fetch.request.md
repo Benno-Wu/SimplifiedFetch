@@ -11,7 +11,7 @@ config of fetch
 ```typescript
 export declare type request = URN | {
     urn: URN;
-    config?: Omit<BaseConfig, 'newName'>;
+    config?: Omit<BaseConfig, 'newName' | 'methodInName'>;
 };
 ```
 <b>References:</b> [URN](./simplified-fetch.urn.md)<!-- -->, [BaseConfig](./simplified-fetch.baseconfig.md)

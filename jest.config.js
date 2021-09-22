@@ -160,7 +160,8 @@ module.exports = {
   testRegex: [
     // "base",
     // "other",
-    // "beforeV0.5",
+    // "beforeV0.6",
+    // "beforeV0.10",
     // "_",
   ],
 

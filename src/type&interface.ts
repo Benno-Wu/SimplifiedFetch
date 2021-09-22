@@ -25,6 +25,10 @@ export interface BaseConfig extends RequestInit {
      */
     method?: Methods
     /**
+     * get method from api's name
+     */
+    methodInName?: (name: string) => Methods,
+    /**
      * how the response will be transformed
      * @defaultValue `json`
      * {@link BodyMixin}
@@ -72,6 +76,8 @@ export type Methods = `DELETE` | `GET` | `HEAD` | `OPTIONS` | `POST` | `PUT` | `
  */
 export type BodyMixin = 'arrayBuffer' | 'blob' | 'formData' | 'json' | 'text'
 
+export type iDynamicConfig = Omit<BaseConfig, "enableAbort" | 'newName' | 'methodInName'>
+
 /**
  * config of each api
  * @param key - access on Api to fetch
@@ -97,7 +103,7 @@ export type request = URN | {
     /**
      * {@link BaseConfig}
      */
-    config?: Omit<BaseConfig, 'newName'>
+    config?: Omit<BaseConfig, 'newName' | 'methodInName'>
 }
 
 /**
@@ -241,7 +247,7 @@ export type PipeUnion = PipeRequest | PipeResponse
  * @public
  */
 export type PipeRequest = (url: URL, config: BaseConfig,
-    param: [bodyAsParams | undefined, any | undefined, Omit<BaseConfig, 'enableAbort' | 'newName'>],
+    param: [bodyAsParams | undefined, any | undefined, iDynamicConfig],
     configs: [string, URN, BaseConfig, BaseConfig]) => unknown
 
 /**
@@ -282,4 +288,4 @@ export type bodyAsParams = string | Record<string, unknown> | Array<unknown> | B
  * Default generic type variables #2175 may help a little.
  * @public
  */
-export type apiF<Body, Param, Return> = (body?: bodyAsParams | Body, params?: Param, config?: Omit<BaseConfig, "enableAbort" | 'newName'>) => Promise<Return>
+export type apiF<Body, Param, Return> = (body?: bodyAsParams | Body, params?: Param, config?: iDynamicConfig) => Promise<Return>

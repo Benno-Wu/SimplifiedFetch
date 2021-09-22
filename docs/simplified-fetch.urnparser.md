@@ -31,6 +31,5 @@ someApi:{
 // somewhere
 Api.someApi(body, ['user', [1,2,3]])
 // getUrl: /xxx/user/1,2,3
-
 ```
 

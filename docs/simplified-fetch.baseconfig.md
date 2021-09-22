@@ -26,6 +26,7 @@ RequestInit [MDN](https://developer.mozilla.org/en-US/docs/Web/API/Request/Reque
 |  [custom?](./simplified-fetch.baseconfig.custom.md) | any | <i>(Optional)</i> any, used for custom config, reuse it in pipeline |
 |  [enableAbort?](./simplified-fetch.baseconfig.enableabort.md) | boolean \| number | <i>(Optional)</i> abort fetch, enable by given true or number(means timeout) |
 |  [method?](./simplified-fetch.baseconfig.method.md) | [Methods](./simplified-fetch.methods.md) | <i>(Optional)</i> default method |
+|  [methodInName?](./simplified-fetch.baseconfig.methodinname.md) | (name: string) =&gt; [Methods](./simplified-fetch.methods.md) | <i>(Optional)</i> get method from api's name |
 |  [newName?](./simplified-fetch.baseconfig.newname.md) | string | <i>(Optional)</i> name to access the SimplifiedFetch on globalThis |
 |  [pureResponse?](./simplified-fetch.baseconfig.pureresponse.md) | boolean | <i>(Optional)</i> set ture will get return Response.clone() |
 |  [suffix?](./simplified-fetch.baseconfig.suffix.md) | string | <i>(Optional)</i> add suffix for url |
