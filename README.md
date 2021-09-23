@@ -7,7 +7,9 @@ Encapsulate a unified API request object to simplify the use of [fetch | MDN](ht
 
 ___support borwser & node.js___
 
-> npm i simplified-fetch
+```bash
+npm i simplified-fetch
+```
 
 [English](./README.md) | [简体中文](./README_zh-CN.md)
 

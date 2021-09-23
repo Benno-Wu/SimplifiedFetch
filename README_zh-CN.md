@@ -7,7 +7,9 @@
 
 ___支持 浏览器 和 node.js___
 
-> npm i simplified-fetch
+```bash
+npm i simplified-fetch
+```
 
 [English](./README.md) | [简体中文](./README_zh-CN.md)
 
